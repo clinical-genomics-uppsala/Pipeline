@@ -1,0 +1,49 @@
+BootStrap: yum
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-%{OSVERSION}/%{OSVERSION}/os/$basearch/
+Include: yum wget
+
+%environment
+    PATH=/opt/conda/bin:/usr/bin:$PATH
+
+%setup
+
+%post
+    ## Tools used to install software
+    yum install -y epel-release
+    yum install -y wget tar bzip2 gcc git fontconfig /tmp/jdk-7u80-linux-x64.rpm
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    bash miniconda.sh -b -u -p /usr
+    hash -r
+    conda config --set always_yes yes --set changeps1 no
+
+    ## Need to downgrade python due to cython and compiled files for datrie
+    conda install python=3.6.0
+    ### Install software needed by CAPS
+    ### Using pip
+    pip install git+https://bitbucket.org/snakemake/snakemake.git@v5.4.2
+    #pip install cutadapt==1.8.0
+    pip install pandas
+    pip install pytools
+    pip install pyvcf
+    ### Using conda, channel bioconda
+    conda install -c bioconda pigz=2.4
+    conda install -c bioconda biopython=1.72
+    conda install -c bioconda bwa=0.7.12
+    #conda install -c bioconda fastqc=0.11.5 --no-deps
+    conda install -c bioconda fgbio=0.7.0
+    conda install -c bioconda lofreq=2.1.3.1-0
+    conda install -c bioconda picard=2.18.26-0
+    conda install -c bioconda samtools=1.3.1
+    conda install -c bioconda trimmomatic=0.35 --no-deps
+    wget https://raw.githubusercontent.com/swiftbiosciences/primerclip/master/.stack-work/install/x86_64-linux/lts-11.0/8.2.2/bin/primerclip -O /usr/local/bin/primerclip
+    chmod a+x /usr/local/bin/primerclip
+    wget https://github.com/CSB5/lofreq/raw/master/src/tools/scripts/lofreq2_indel_ovlp.py -O /usr/local/bin/lofreq2_indel_ovlp.py
+    chmod +x /usr/local/bin/lofreq2_indel_ovlp.py
+%files
+
+%runscript
+    exec echo "This container can be run with --app snakemake"
+
+%apprun snakemake
+    exec snakemake "$@" --wrapper-prefix git+file:///snakemake-wrappers

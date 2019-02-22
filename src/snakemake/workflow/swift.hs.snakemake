@@ -1,0 +1,55 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+from os import path
+
+wildcard_constraints:
+    unit="[A-Za-z0-9]+",
+    sample="[A-Za-z0-9-]+",
+    read="[fq12]+",
+    part="\d{4}|\d{4}-consensus\d+|", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
+    consensus="\d{4}-consensus\d+"
+
+singularity: "/projects/wp1/nobackup/ngs/utveckling/workspace/swift/Pipeline/singularity/swift_hs.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
+
+def _get_split_and_unit_part_files(wildcards, units, config):
+    num_splits = config.get("num_fastq_split", 1)
+    if num_splits > 1:
+        return [ unit + "-%04d" % part for part in range(0,num_splits) for unit in units.loc[wildcards.sample].index]
+    else:
+        return [ unit + "-0000" for unit in units.loc[wildcards.sample].index]
+
+from pytools.persistent_dict import PersistentDict
+storage = PersistentDict("caps_mystorage")
+
+split_fastq_input = lambda wildcards: units.loc[(path.split(wildcards.sample)[-1], wildcards.unit), [wildcards.read]].dropna()[0]
+include: "../rules/fastq/split_fastq.smk"
+
+include: "../rules/fastq/headcrop_read.smk"
+
+include: "../rules/umi/extract_umis_read_head.smk"
+
+bwa_mem_input = ["fastq/{sample}.{part}.fq1.fastq.gz", "fastq/{sample}.{part}.fq2.headcrop10.fastq.gz"]
+include: "../rules/alignment/bwa_mem.smk"
+
+annotate_bam_with_umi_input_umi = "umis/{sample}.{part,[A-Za-z0-9]+-\d{4}}.fq2.UMIs10.fastq"
+include: "../rules/umi/annotate_bam_with_umi.smk"
+
+merge_bam_input = lambda wildcards: ["alignment/{}.{}.umiAnnoBam.bam".format(wildcards.sample,unit_part) for unit_part in _get_split_and_unit_part_files(wildcards,units,config)]
+merge_bam_output = "alignment/{sample}.0000.bam"
+include: "../rules/alignment/merge_bam.smk"
+
+collapse_reads_input="alignment/{sample}.{part}.bam"
+collapse_reads_output="alignment/{sample}.{part,\d{4}}-consensus{num_support}.primerclip_input.bam"
+include: "../rules/umi/collapse_reads.smk"
+
+add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
+add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
+include: "../rules/alignment/add_replace_read_group.smk"
+
+lofreq_input=_add_replace_read_group_output
+include: "../rules/callers/lofreq.smk"
+
+primerclip_input="alignment/{sample}.{part}.primerclip_input.bam"
+primerclip_output="alignment/{sample}.{part}.primerclip_output.bam"
+include: "../rules/trimming/primerclip.smk"
