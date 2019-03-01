@@ -40,7 +40,21 @@ Include: yum wget
     chmod a+x /usr/local/bin/primerclip
     wget https://github.com/CSB5/lofreq/raw/master/src/tools/scripts/lofreq2_indel_ovlp.py -O /usr/local/bin/lofreq2_indel_ovlp.py
     chmod +x /usr/local/bin/lofreq2_indel_ovlp.py
+    chmod +x /usr/local/bin/table_annovar.pl
+    chmod +x /usr/local/bin/annotate_variation.pl
+    chmod +x /usr/local/bin/coding_change.pl
+    chmod +x /usr/local/bin/convert2annovar.pl
+    chmod +x /usr/local/bin/retrieve_seq_from_fasta.pl
+    chmod +x /usr/local/bin/table_annovar.pl
+    chmod +x /usr/local/bin/variants_reduction.pl
 %files
+    table_annovar.pl /usr/local/bin/
+    annotate_variation.pl  /usr/local/bin/
+    coding_change.pl  /usr/local/bin/
+    convert2annovar.pl /usr/local/bin/
+    retrieve_seq_from_fasta.pl /usr/local/bin/
+    table_annovar.pl /usr/local/bin/
+    variants_reduction.pl /usr/local/bin/
 
 %runscript
     exec echo "This container can be run with --app snakemake"

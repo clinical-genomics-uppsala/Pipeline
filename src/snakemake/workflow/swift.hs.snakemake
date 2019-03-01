@@ -43,6 +43,10 @@ collapse_reads_input="alignment/{sample}.{part}.bam"
 collapse_reads_output="alignment/{sample}.{part,\d{4}}-consensus{num_support}.primerclip_input.bam"
 include: "../rules/umi/collapse_reads.smk"
 
+primerclip_input="alignment/{sample}.{part}.primerclip_input.bam"
+primerclip_output="alignment/{sample}.{part}.primerclip_output.bam"
+include: "../rules/trimming/primerclip.smk"
+
 add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
 add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
 include: "../rules/alignment/add_replace_read_group.smk"
@@ -50,6 +54,7 @@ include: "../rules/alignment/add_replace_read_group.smk"
 lofreq_input=_add_replace_read_group_output
 include: "../rules/callers/lofreq.smk"
 
-primerclip_input="alignment/{sample}.{part}.primerclip_input.bam"
-primerclip_output="alignment/{sample}.{part}.primerclip_output.bam"
-include: "../rules/trimming/primerclip.smk"
+
+annovar_table_output="variants/{sample}.{part}.lofreq.annovar.vcf"
+annovar_table_input=_lofreq_output
+include: "../rules/annotation/annovar_table.smk"

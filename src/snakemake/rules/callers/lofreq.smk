@@ -33,8 +33,6 @@ rule merge_lofreq_indels:
         temp("variants/{sample}.{part}.tmp.lofreq.vcf")
     output:
         _lofreq_output[:]
-    params:
-        extra="-Xms500m -Xmx64g"
     log:
         "logs/lofreq/{sample}.{part}.merge.log"
     wrapper:
