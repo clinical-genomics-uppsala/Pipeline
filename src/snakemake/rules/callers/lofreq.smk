@@ -32,8 +32,31 @@ rule merge_lofreq_indels:
     input:
         temp("variants/{sample}.{part}.tmp.lofreq.vcf")
     output:
-        _lofreq_output[:]
+        temp("variants/{sample}.{part}.tmp.merged.lofreq.vcf")
     log:
         "logs/lofreq/{sample}.{part}.merge.log"
     wrapper:
         "master/bio/lofreq/tools/lofreq2indelovlp"
+
+rule lofreq_aadd_AD_filed:
+    input:
+        temp("variants/{sample}.{part}.tmp.merged.lofreq.vcf")
+    output:
+        temp("variants/{sample}.{part}.tmp.merged.ad.lofreq.vcf")
+    log:
+        "logs/lofreq/{sample}.{part}.merge.ad.log"
+    shell:
+        from src.lib.data.file.vcf import add_AD_field_using_DP4
+        add_AD_field_using_DP4(input[0],output[0])
+
+rule lofreq_add_contigs_to_header
+    input:
+        temp("variants/{sample}.{part}.tmp.merged.ad.lofreq.vcf")
+    output:
+        _lofreq_output[:]
+    log:
+        "logs/lofreq/{sample}.{part}.merge.contigs.log"
+    paramts:
+        contigs=config['reference_contigs'],
+        assembly=config['assembly']
+    shell:
