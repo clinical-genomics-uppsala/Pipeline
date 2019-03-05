@@ -16,7 +16,7 @@ except:
 
 rule lofreq:
     input:
-        _lofreq_input[:]
+        _lofreq_input
     output:
         temp("variants/{sample}.{part}.tmp.lofreq.vcf")
     params:
@@ -30,7 +30,7 @@ rule lofreq:
 
 rule merge_lofreq_indels:
     input:
-        temp("variants/{sample}.{part}.tmp.lofreq.vcf")
+        "variants/{sample}.{part}.tmp.lofreq.vcf"
     output:
         temp("variants/{sample}.{part}.tmp.merged.lofreq.vcf")
     log:
@@ -38,25 +38,27 @@ rule merge_lofreq_indels:
     wrapper:
         "master/bio/lofreq/tools/lofreq2indelovlp"
 
-rule lofreq_aadd_AD_filed:
+rule lofreq_add_contigs_to_header:
     input:
-        temp("variants/{sample}.{part}.tmp.merged.lofreq.vcf")
+        "variants/{sample}.{part}.tmp.merged.lofreq.vcf" #"variants/{sample}.{part}.tmp.merged.ad.lofreq.vcf"
     output:
-        temp("variants/{sample}.{part}.tmp.merged.ad.lofreq.vcf")
-    log:
-        "logs/lofreq/{sample}.{part}.merge.ad.log"
-    shell:
-        from src.lib.data.file.vcf import add_AD_field_using_DP4
-        add_AD_field_using_DP4(input[0],output[0])
-
-rule lofreq_add_contigs_to_header
-    input:
-        temp("variants/{sample}.{part}.tmp.merged.ad.lofreq.vcf")
-    output:
-        _lofreq_output[:]
+        temp("variants/{sample}.{part}.tmp.merged.contigs.lofreq.vcf")
     log:
         "logs/lofreq/{sample}.{part}.merge.contigs.log"
-    paramts:
+    params:
         contigs=config['reference_contigs'],
         assembly=config['assembly']
-    shell:
+    run:
+        from src.lib.data.files.vcf import add_contigs_to_header
+        add_contigs_to_header(str(input[0]),str(output[0]),params.contigs,params.assembly)
+
+rule lofreq_add_AD_filed:
+    input:
+        "variants/{sample}.{part}.tmp.merged.contigs.lofreq.vcf"
+    output:
+         _lofreq_output
+    log:
+        "logs/lofreq/{sample}.{part}.merge.ad.log"
+    run:
+        from src.lib.data.files.vcf import add_AD_field_using_DP4
+        add_AD_field_using_DP4(input[0],output[0])
