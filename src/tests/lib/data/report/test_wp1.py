@@ -22,12 +22,14 @@ class TestWp1Reports(unittest.TestCase):
         self.hotspot = os.path.join(self.tempdir,"hotspot")
         with open(self.hotspot,'w') as hotspots:
             hotspots.write("#Chr\tStart\tEnd\tGene\tCDS_mutation_syntax\tAA_mutation_syntax\tReport\tcomment\tExon\tAccession_number\n")
+            hotspots.write("NC_000002.11\t29445258\t29445258\tALK\tc.G3467\tp.C1156\tregion\tresistance_mutation\texon22\tNM_004304\n")
             hotspots.write("NC_000007.13\t55242466\t55242466\tEGFR\tc.G2236\tp.E746\thotspot\t-\texon19\tNM_005228\n")
             hotspots.write("NC_000007.13\t140453136\t140453136\tBRAF\tc.T1799\tp.V600\thotspot\t-\texon15\tNM_004333\n")
             hotspots.write("NC_000007.13\t116412043\t116412043\tMET\tc.G3082\tp.D1028\thotspot\t-\texon14\tNM_001127500\n")
 
         self.pileup = os.path.join(self.tempdir,"pilup")
         with open(self.pileup, "w") as pileup:
+            pileup.write("chr2\t29445258\tC\t600\t...\t...\n")
             pileup.write("chr7\t55242464\tC\t830\t...\t...\n")
             pileup.write("chr7\t55242465\tC\t831\t...\t...\n")
             pileup.write("chr7\t55242466\tC\t832\t...\t...\n")
@@ -49,6 +51,7 @@ class TestWp1Reports(unittest.TestCase):
             vcf.write("##FORMAT=<ID=AD,Number=.,Type=Integer,Description=\"Allelic depths for the ref and alt alleles in the order listed\">\n")
             vcf.write("##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Approximate read depth (reads with MQ=255 or with bad mates are filtered)\">\n")
             vcf.write("##contig=<ID=chr1,length=249250621,assembly=hg19>\n")
+            vcf.write("##contig=<ID=chr2,length=242951149,assembly=hg19>\n")
             vcf.write("##contig=<ID=chr3,length=199501827,assembly=hg19>\n")
             vcf.write("##contig=<ID=chr7,length=158821424,assembly=hg19>\n")
             vcf.write("##contig=<ID=chr12,length=133851895,assembly=hg19>\n")
@@ -67,6 +70,7 @@ class TestWp1Reports(unittest.TestCase):
             vcf.write("##INFO=<ID=clinvar_20150629,Number=.,Type=String,Description=\"clinvar_20150629 annotation provided by ANNOVAR\">\n")
             vcf.write("##INFO=<ID=ALLELE_END,Number=0,Type=Flag,Description=\"Flag the end of ANNOVAR annotation for one alternative allele\">\n")
             vcf.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n")
+            vcf.write("chr2\t29445216\t.\tATCAGGGCTTCCATGAGGAAATCCAGTTCGTCCTGTTCAGAGCACACTTCAGGCAGCGTCTGGGCAGAGAAGGGGAGGGTGGGGAGGAGGAG\tGCTGGTGCGGTCTCA\t.\t.\tANNOVAR_DATE=2015-06-17;Func.refGene=exonic;Gene.refGene=ALK;GeneDetail.refGene=.;ExonicFunc.refGene=frameshift_substitution;AAChange.refGene=ALK:NM_004304:exon22:c.3451_3509TGAGACCGCACCAGC;1000g2015aug_eur=.;snp138=.;snp138NonFlagged=.;esp6500siv2_ea=.;cosmic70=.;clinvar_20150629=.;ALLELE_END\tGT:DP:AD\t0/1:596:580,16\n")
             vcf.write("chr7\t55242464\trs121913421;COSM6223\tAGGAATTAAGAGAAGC\tA\t.\t.\tANNOVAR_DATE=2015-06-17;Func.refGene=exonic;Gene.refGene=EGFR;GeneDetail.refGene=.;ExonicFunc.refGene=nonframeshift_deletion;AAChange.refGene=EGFR:NM_005228:exon19:c.2235_2249del:p.745_750del;1000g2015aug_eur=.;snp138=rs121913421;snp138NonFlagged=.;esp6500siv2_ea=.;cosmic70=ID\x3dCOSM6223\x3bOCCURENCE\x3d894(lung),2(thyroid),3(upper_aerodigestive_tract),1(oesophagus),2(ovary),4(salivary_gland);clinvar_20150629=CLINSIG\x3ddrug-response\x3bCLNDBN\x3dTyrosine_kinase_inhibitor_response\x3bCLNREVSTAT\x3dno_assertion_criteria_provided\x3bCLNACC\x3dRCV000150617.1\x3bCLNDSDB\x3dMedGen\x3bCLNDSDBID\x3dCN225347;ALLELE_END\tGT:DP:AD\t0/1:613:214,399\n")
             vcf.write("chr7\t116411979\t.\tTGTAAGCCCAACTACAGAAATGGTTTCAAATGAATCTGTAGACTACCGAGCTACTTTTCCAGAAGGTATATTTCAGTTTATTGTTCTGAGAA\tCT\t.\t.\tANNOVAR_DATE=2015-06-17;Func.refGene=exonic;Gene.refGene=MET;GeneDetail.refGene=.;ExonicFunc.refGene=nonframeshift_substitution;AAChange.refGene=MET:NM_000245:exon14:c.2964_3028CT,MET:NM_001127500:exon14:c.3018_3082CT;1000g2015aug_eur=.;snp138=.;snp138NonFlagged=.;esp6500siv2_ea=.;cosmic70=.;clinvar_20150629=.;ALLELE_END\tGT:DP:AD\t0/1:391:386,5\n")
             vcf.write("chr7\t140453136\trs113488022;COSM476\tA\tT\t.\t.\t.;ANNOVAR_DATE=2015-06-17;Func.refGene=exonic;Gene.refGene=BRAF;GeneDetail.refGene=.;ExonicFunc.refGene=nonsynonymous_SNV;AAChange.refGene=BRAF:NM_004333:exon15:c.T1799A:p.V600E;1000g2015aug_eur=.;snp138=rs113488022;snp138NonFlagged=.;esp6500siv2_ea=.;cosmic70=ID\x3dCOSM476\x3bOCCURENCE\x3d3(adrenal_gland),3(urinary_tract),4(genital_tract),7(pancreas),16(liver),68(eye),2(prostate),4161(large_intestine),21(biliary_tract),11(breast),4377(skin),9(small_intestine),1(autonomic_ganglia),20(pituitary),242(ovary),32(soft_tissue),7(testis),459(haematopoietic_and_lymphoid_tissue),9534(thyroid),78(lung),1(meninges),12(upper_aerodigestive_tract),717(NS),15(bone),2(oesophagus),4(stomach),228(central_nervous_system);clinvar_20150629=CLINSIG\x3dpathogenic,pathogenic|pathogenic|pathogenic|pathogenic|pathogenic|pathogenic|pathogenic\x3bCLNDBN\x3dRasopathy,Carcinoma_of_colon|Papillary_thyroid_carcinoma|Astrocytoma\x2c_low-grade\x2c_somatic|Germ_cell_tumor\x2c_nonseminomatous|Non-small_cell_lung_cancer|Malignant_melanoma|not_provided\x3bCLNREVSTAT\x3dcriteria_provided\x2c_single_submitter,no_assertion_criteria_provided|no_assertion_criteria_provided|no_assertion_criteria_provided|no_assertion_criteria_provided|no_assertion_criteria_provided|no_assertion_criteria_provided|criteria_provided\x2c_single_submitter\x3bCLNACC\x3dRCV000033335.2,RCV000014992.10|RCV000014993.10|RCV000014994.10|RCV000022677.10|RCV000037936.2|RCV000067669.8|RCV000080903.3\x3bCLNDSDB\x3dMedGen,MedGen:SNOMED_CT|MedGen:OMIM:Orphanet:SNOMED_CT|.|MedGen|MedGen:SNOMED_CT|MedGen:SNOMED_CT|MedGen\x3bCLNDSDBID\x3dCN166718,C0699790:269533000|C0238463:188550:ORPHA146:255029007|.|C1266158|C0007131:254637007|C0025202:2092003|CN221809;ALLELE_END\tGT:DP:AD\t0/1:6142:4397,1744\n")
@@ -77,7 +81,7 @@ class TestWp1Reports(unittest.TestCase):
         with open(self.reference,'w') as reference:
             reference.write("#Chr name\tNC\tID\tLength\n")
             reference.write("chr1\tNC_000001.10\tchr1#NC_000001.10#1#249250621#-1\t249250621\n")
-            reference.write("chr2\tNC_000002.10\tChr2#NC_000002.10#1#242951149#-1\t242951149\n")
+            reference.write("chr2\tNC_000002.11\tChr2#NC_000002.10#1#242951149#-1\t242951149\n")
             reference.write("chr3\tNC_000003.10\tChr3#NC_000003.10#1#199501827#-1\t199501827\n")
             reference.write("chr4\tNC_000004.10\tChr4#NC_000004.10#1#191273063#-1\t191273063\n")
             reference.write("chr5\tNC_000005.8\tChr5#NC_000005.8#1#180857866#-1\t180857866\n")
@@ -90,7 +94,7 @@ class TestWp1Reports(unittest.TestCase):
 #M_005228	-	2-indel	yes	ok	4200	2996	1204	0.286666666667	-	-	-	No	ID=COSM12384;OCCURENCE=55(lung)	Tyrosine_kinase_inhibitor_response	drug-response	-	-	-	-	-	-	-	-	-	+1161|-43	-	-	NC_000007.13	55242467	55242485	AATTAAGAGAAGCAACATC	T	EGFR:NM_005228:exon19:c.2237_2255T
     def tearDown(self):
         # delete fixtures
-        pass #shutil.rmtree(self.tempdir)
+        shutil.rmtree(self.tempdir)
 
     def test_get_read_level(self):
         from src.lib.data.report.wp1 import get_read_level
@@ -104,14 +108,12 @@ class TestWp1Reports(unittest.TestCase):
         self.assertEqual(get_read_level(levels, -15), ("-","zero"))
         self.assertEqual(get_read_level(levels, "-"), ("-","zero"))
 
-#generate_filtered_mutations(report, hotspot_file, vcf_file, pileup, chr_mapping):
+
     def test_filtered_mutation_creation_annovar(self):
         from src.lib.data.report.wp1 import generate_filtered_mutations
         levels = [(300 ,"ok","yes"), (30 ,"low","yes"),(0 ,"low","not analyzable")]
 
         report = os.path.join(self.tempdir,"filtered.report")
-        #hotspot = os.path.join(self.tempdir,"hotspot")
-        #reference = os.path.join(self.tempdir,"reference_info")
         generate_filtered_mutations("sample1", report, levels, self.hotspot, self.vcf + ".gz" , self.pileup, self.reference, self.multibp, {"ERBB2": "NM_004448", "MET": "NM_001127500"})
 
         self.maxDiff = 10000
@@ -129,18 +131,16 @@ class TestWp1Reports(unittest.TestCase):
                                                     "Chr","Start","End","Reference_base","Variant_base","All_transcripts_annotation"]))
             result = report_result.readlines()
             self.assertEqual(result[0].rstrip(),
-                "sample1\tEGFR\tnonframeshift_deletion\texon19\tp.E746_A750del\tc.2235_2249del\tNM_005228\t-\t2-indel\tyes\tok\t832\t613\t214\t399\t0.6508972267536705\trs121913421\t-\t-\tYes\tID=COSM6223;OCCURENCE=894(lung),2(thyroid),3(upper_aerodigestive_tract),1(oesophagus),2(ovary),4(salivary_gland)\tTyrosine_kinase_inhibitor_response\tdrug-response\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t55242465\t55242479\tGGAATTAAGAGAAGC\t-\tEGFR:NM_005228:exon19:c.2235_2249del:p.745_750del")
+                "sample1\tALK\tframeshift_substitution\texon22\t-\tc.3451_3509TGAGACCGCACCAGC\tNM_004304\tresistance_mutation\t3-check\tyes\tok\t600\t596\t580\t16\t0.026845637583892617\t-\t-\t-\tNo\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000002.11\t29445216\t29445307\tATCAGGGCTTCCATGAGGAAATCCAGTTCGTCCTGTTCAGAGCACACTTCAGGCAGCGTCTGGGCAGAGAAGGGGAGGGTGGGGAGGAGGAG\tGCTGGTGCGGTCTCA\tALK:NM_004304:exon22:c.3451_3509TGAGACCGCACCAGC")
             self.assertEqual(result[1].rstrip(),
-                "sample1\tBRAF\tnonsynonymous_SNV\texon15\tp.V600E\tc.T1799A\tNM_004333\t-\t1-hotspot\tyes\tok\t834\t6142\t4397\t1744\t0.28394659719960924\trs113488022\t-\t-\tYes\tID=COSM476;OCCURENCE=3(adrenal_gland),3(urinary_tract),4(genital_tract),7(pancreas),16(liver),68(eye),2(prostate),4161(large_intestine),21(biliary_tract),11(breast),4377(skin),9(small_intestine),1(autonomic_ganglia),20(pituitary),242(ovary),32(soft_tissue),7(testis),459(haematopoietic_and_lymphoid_tissue),9534(thyroid),78(lung),1(meninges),12(upper_aerodigestive_tract),717(NS),15(bone),2(oesophagus),4(stomach),228(central_nervous_system)\tRasopathy,Carcinoma_of_colon|Papillary_thyroid_carcinoma|Astrocytoma\x2c_low-grade\x2c_somatic|Germ_cell_tumor\x2c_nonseminomatous|Non-small_cell_lung_cancer|Malignant_melanoma|not_provided\tpathogenic,pathogenic|pathogenic|pathogenic|pathogenic|pathogenic|pathogenic|pathogenic\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t140453136\t140453136\tA\tT\tBRAF:NM_004333:exon15:c.T1799A:p.V600E")
+                "sample1\tEGFR\tnonframeshift_deletion\texon19\tp.E746_A750del\tc.2235_2249del\tNM_005228\t-\t2-indel\tyes\tok\t832\t613\t214\t399\t0.6508972267536705\trs121913421\t-\t-\tYes\tID=COSM6223;OCCURENCE=894(lung),2(thyroid),3(upper_aerodigestive_tract),1(oesophagus),2(ovary),4(salivary_gland)\tTyrosine_kinase_inhibitor_response\tdrug-response\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t55242465\t55242479\tGGAATTAAGAGAAGC\t-\tEGFR:NM_005228:exon19:c.2235_2249del:p.745_750del")
             self.assertEqual(result[2].rstrip(),
-            #    "sample1\tMET\t-\texon14\t-\tc.2942-2A\tNM_001127500\t-\thotspot\tzero\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t116411901\t116411901\t-\t-\t-")
-            #self.assertEqual(result[3].rstrip(),
-                "sample1\tMET\tnonframeshift_substitution\texon14\t-\tc.3018_3082CT\tNM_001127500\t-\t2-indel\tyes\tok\t999\t391\t386\t5\t0.01278772378516624\t-\t-\t-\tNo\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t116411979\t116412070\tTGTAAGCCCAACTACAGAAATGGTTTCAAATGAATCTGTAGACTACCGAGCTACTTTTCCAGAAGGTATATTTCAGTTTATTGTTCTGAGAA\tCT\tMET:NM_000245:exon14:c.2964_3028CT,MET:NM_001127500:exon14:c.3018_3082CT")
+                "sample1\tBRAF\tnonsynonymous_SNV\texon15\tp.V600E\tc.T1799A\tNM_004333\t-\t1-hotspot\tyes\tok\t834\t6142\t4397\t1744\t0.28394659719960924\trs113488022\t-\t-\tYes\tID=COSM476;OCCURENCE=3(adrenal_gland),3(urinary_tract),4(genital_tract),7(pancreas),16(liver),68(eye),2(prostate),4161(large_intestine),21(biliary_tract),11(breast),4377(skin),9(small_intestine),1(autonomic_ganglia),20(pituitary),242(ovary),32(soft_tissue),7(testis),459(haematopoietic_and_lymphoid_tissue),9534(thyroid),78(lung),1(meninges),12(upper_aerodigestive_tract),717(NS),15(bone),2(oesophagus),4(stomach),228(central_nervous_system)\tRasopathy,Carcinoma_of_colon|Papillary_thyroid_carcinoma|Astrocytoma\x2c_low-grade\x2c_somatic|Germ_cell_tumor\x2c_nonseminomatous|Non-small_cell_lung_cancer|Malignant_melanoma|not_provided\tpathogenic,pathogenic|pathogenic|pathogenic|pathogenic|pathogenic|pathogenic|pathogenic\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t140453136\t140453136\tA\tT\tBRAF:NM_004333:exon15:c.T1799A:p.V600E")
             self.assertEqual(result[3].rstrip(),
+                "sample1\tMET\tnonframeshift_substitution\texon14\t-\tc.3018_3082CT\tNM_001127500\t-\t2-indel\tyes\tok\t999\t391\t386\t5\t0.01278772378516624\t-\t-\t-\tNo\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000007.13\t116411979\t116412070\tTGTAAGCCCAACTACAGAAATGGTTTCAAATGAATCTGTAGACTACCGAGCTACTTTTCCAGAAGGTATATTTCAGTTTATTGTTCTGAGAA\tCT\tMET:NM_000245:exon14:c.2964_3028CT,MET:NM_001127500:exon14:c.3018_3082CT")
+            self.assertEqual(result[4].rstrip(),
                 "sample1\tERBB2\tnonsynonymous_SNV\texon25\tp.G1015E\tc.G3044A\tNM_004448\t-\t4-other\tyes\tok\t1288\t3797\t1824\t1971\t0.5190940215959968\trs140272156\t0.004000000189989805\t0.0020000000949949026\tNo\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\tNC_000017.10\t37883141\t37883141\tG\tA\tERBB2:NM_001289937:exon25:c.G3044A:p.G1015E,ERBB2:NM_004448:exon25:c.G3044A:p.G1015E,ERBB2:NM_001005862:exon28:c.G2954A:p.G985E,ERBB2:NM_001289936:exon29:c.G2999A:p.G1000E")
-            #self.assertEqual(result[1].rstrip(),"")
 
-            #
 
 
 if __name__ == '__main__':

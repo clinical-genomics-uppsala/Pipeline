@@ -79,7 +79,7 @@ class MultiBpVariantData(object):
         return self.data.get("{}:{}:{}:{}:{}".format(chromosome, start, stop, reference, variant), None)
 
 class Hotspot(object):
-    def __init__(self, CHROMOSOME, START, END, GENE, CDS_MUTATION_SYNTAX, AA_MUTATION_SYNTAX, REPORT, COMMENT, EXON, ACCESSION_NUMBER):
+    def __init__(self, CHROMOSOME, START, END, GENE, CDS_MUTATION_SYNTAX, AA_MUTATION_SYNTAX, REPORT, COMMENT, EXON, ACCESSION_NUMBER, PRINT_ALL=False):
         self.CHROMOSOME = CHROMOSOME
         self.START = START
         self.END = END
@@ -116,6 +116,8 @@ class Hotspot(object):
 
         self.EXTENDED_START = self.START
         self.EXTENDED_END = self.END
+        self.PRINT_ALL = PRINT_ALL
+        self.VARIANT_ADDED = False
 
     def check_overlapp(self, chrom, region_start, region_stop, start,stop=None):
         #print(self.CHROMOSOME + " == " + chrom + " and (( " + str(stop) + " is not None and " + str(region_start) + " <= " + str(stop) + " and " + str(start) + " <= " + str(region_stop) + ") or (" + str(region_start) + " <= " + str(start) + " <= " + str(region_stop) + ")) " + str(self.CHROMOSOME == chrom) + " " + str((stop is not None and region_start <= stop and start <= region_stop)))
@@ -138,22 +140,15 @@ class Hotspot(object):
                                 new_depth_var.append(self.DEPTH_VARIANTS[new_start - self.EXTENDED_START + i])
                             else:
                                 new_depth_var.append({'depth': "-", 'extended': True, 'variants': []})
-                        #print(str(self.DEPTH_VARIANTS))
                         self.DEPTH_VARIANTS = new_depth_var
                         self.EXTENDED_START = new_start
                         self.EXTENDED_END = new_end
                 position = self.START - self.EXTENDED_START
-                #if vcf.is_indel(variant):
-                #    position = position
-                #print("Adding var .. " + str(self.DEPTH_VARIANTS[position]['extended'])  + "\t" + str(v_start) +"\t" + str(position) + "\t" + str(self.EXTENDED_START) + "\t" + str(self.EXTENDED_END) + "\t" + str(self.START) + "\t" + str(self.END))
                 try:
                     self.DEPTH_VARIANTS[position]['variants'].append(variant)
-                except IndexError:
-                    position = 0
-                    self.DEPTH_VARIANTS[position]['variants'] = [variant]
                 except:
                     self.DEPTH_VARIANTS[position]['variants'] = [variant]
-                #print(str(self.DEPTH_VARIANTS))
+                self.VARIANT_ADDED = True
                 return True
         return False
 

@@ -1,6 +1,8 @@
 import pysam
 import src.lib.data.files.vcf as vcf
 
+from src.lib.data.files.models import ReportClass
+
 def get_annoation_data(variant,info_name):
     if isinstance(variant, pysam.VariantRecord):
         try:
@@ -30,8 +32,10 @@ def get_depth(variant,sample):
     if isinstance(variant, pysam.VariantRecord):
         return (get_sample_value(variant,sample)['DP'],) + get_sample_value(variant,sample)['AD']
 
-def get_report_type(variant):
+def get_report_type(variant, report):
     if isinstance(variant, pysam.VariantRecord):
+        if report == ReportClass.region or report == ReportClass.region_all:
+            return "3-check"
         if vcf.is_indel(variant) or vcf.is_multibp_sub(variant):
             return "2-indel"
     return "1-hotspot"

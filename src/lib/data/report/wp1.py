@@ -69,7 +69,7 @@ def get_read_level(read_levels, rd):
         pass
     return "-", "zero"
 
-def _print_variant(writer, variant, sample, chrom, mutation_type, levels, pileup_depth, multibp, prefered_transcripts):
+def _print_variant(writer, variant, sample, chrom, mutation_type, levels, pileup_depth, multibp, prefered_transcripts, comment):
     depth_staus, found = get_read_level(levels, pileup_depth)
     variant_type = utils.get_annoation_data(variant, "Func.refGene")
     exonic_type = utils.get_annoation_data(variant, "ExonicFunc.refGene")
@@ -112,11 +112,14 @@ def _print_variant(writer, variant, sample, chrom, mutation_type, levels, pileup
         cds_changes = multibp_variant.CDS_CHANGE
         if not transcripts == multibp_variant.TRANSCRIPT:  # if there is a different accession number set comment to altTranscript
             transcripts = multibp_variant.TRANSCRIPT
-            comm = "altTranscript"
+            if comment == "-":
+                comment = "altTranscript"
+            else:
+                comment = comment + ", " +altTranscript
 
     writer.write("\n" + (_construct_entry(sample=sample , gene=genes, variant_type=exonic_type, exon=exons_introns,
           aa_change=aa_changes, cds_change=cds_changes,
-          accession_number = transcripts, comment=comm,
+          accession_number = transcripts, comment=comment,
           report=mutation_type, found=found, min_read_depth300=depth_staus, pileup_depth=pileup_depth, total_read_depth=total_depth,
           reference_read_depth=ref_depth, variant_read_depth=var_depth, variant_allele_ratio=vaf,
           dbsnp_id=dbSNP_id, ratio_1000g=ratio_1000g, ratio_esp6500=ratio_esp6500, clinically_flagged_dbsnp=clinical_flagged,
@@ -212,7 +215,7 @@ def _print_report(writer, sample, hotspot, other, levels, chr_translater, multib
         else:
             for var in depth_variant['variants']:
                 #print("Depth: " + str(depth_variant['depth']) + "\t" + str(var))
-                _print_variant(writer, var, sample, chr_translater.get_nc_value(var.chrom), utils.get_report_type(var), levels, depth_variant['depth'], multibp, prefered_transcripts)
+                _print_variant(writer, var, sample, chr_translater.get_nc_value(var.chrom), utils.get_report_type(var, hotspot.REPORT), levels, depth_variant['depth'], multibp, prefered_transcripts, hotspot.COMMENT)
 
 
 def generate_filtered_mutations(sample, report, levels, hotspot_file, vcf_file, pileup_file, chr_mapping, multibp_file, prefered_transcripts):
@@ -249,4 +252,4 @@ def generate_filtered_mutations(sample, report, levels, hotspot_file, vcf_file, 
             _print_report(filtered_mutations, sample, hotspot, other, levels, chr_translater, multibp, prefered_transcripts)
         #print("Other")
         for var in other:
-            _print_variant(filtered_mutations, var[0], sample, chr_translater.get_nc_value(var[0].chrom), "4-other", levels, var[1], multibp, prefered_transcripts)
+            _print_variant(filtered_mutations, var[0], sample, chr_translater.get_nc_value(var[0].chrom), "4-other", levels, var[1], multibp, prefered_transcripts, "-")

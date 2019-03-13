@@ -69,5 +69,7 @@ class Reader(object):
         comment = row[self.header['COMMENT']]
         exon = row[self.header['EXON']]
         accession_numbber = row[self.header['ACCESSION_NUMBER']]
-
-        return Hotspot(chrom, start, stop, gene, cds, aa, report, comment, exon, accession_numbber)
+        print_all = False
+        if report == ReportClass.region or report == ReportClass.region_all:
+            print_all = True
+        return Hotspot(chrom, start, stop, gene, cds, aa, report, comment, exon, accession_numbber, print_all)
