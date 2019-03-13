@@ -21,19 +21,23 @@ class Reader(object):
         else:
             if compressed is None:
                 compressed = filename.endswith('.gz')
-            self._reader = open(filename, 'rb' if compressed else 'rt')
+
+        self._reader = open(filename, 'rb' if compressed else 'rt')
         self.filename = filename
 
         self._separator = '\t'
 
         self._row_pattern =  re.compile(self._separator)
 
-        self.reader = (line.strip() for line in self._reader if line.strip())
+        self.reader = (line.rstrip() for line in self._reader)
 
         self._parse_header()
 
         self.mapper = dict()
 
+    def __del__(self):
+        if self._reader and not self._reader.closed:
+            self._reader.close()
 
     def _parse_header(self):
         line = next(self.reader)
@@ -46,8 +50,10 @@ class Reader(object):
     def __iter__(self):
         return self
 
-
     def next(self):
+        return self.__next__()
+
+    def __next__(self):
         '''Return the next record in the file.'''
         line = next(self.reader)
         row = self._row_pattern.split(line.rstrip())

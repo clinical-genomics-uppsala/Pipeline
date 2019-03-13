@@ -5,6 +5,9 @@ from enum import Enum, auto, unique
 import enum
 import re
 
+import pysam
+
+import src.lib.data.files.vcf as vcf
 
 _cds_pattern =  re.compile(r'^c\..+|^-$')
 _aa_pattern =  re.compile(r'^p\..+|^-$')
@@ -41,6 +44,39 @@ class PileupPosition(object):
         self.REFERENCE_BASE = REFERENCE_BASE
         self.DEPTH = int(DEPTH)
 
+    def __str__(self):
+        return "{}\t{}\t{}\t{}".format(self.CHROMOSOME, self.POSITION, self.REFERENCE_BASE, self.DEPTH)
+
+
+class MultiBpVariant(object):
+    def __init__(self,CHROMOSOME, START, STOP, REFERENCE, VARIANT, GENE, CDS_CHANGE, AA_CHANGE, TRANSCRIPT):
+        self.CHROMOSOME = CHROMOSOME
+        self.START = START
+        self.STOP = STOP
+        self.REFERENCE = REFERENCE
+        self.VARIANT = VARIANT
+        self.GENE = GENE
+        self.CDS_CHANGE = CDS_CHANGE
+        self.AA_CHANGE = AA_CHANGE
+        self.TRANSCRIPT = TRANSCRIPT.split(".")[0]
+
+    def __str__(self):
+        return "{}\t{}\t{}\t{}\t{}".format(self.CHROMOSOME, self.START, self.STOP, self.REFERENCE, self.VARIANT)
+
+class MultiBpVariantData(object):
+    def __init__(self, data_file):
+        self.data = {}
+        from src.lib.data.files.multibp import Reader
+        reader = Reader(data_file)
+        for bp in reader:
+            key = "{}:{}:{}:{}:{}".format(bp.CHROMOSOME, bp.START, bp.STOP, bp.REFERENCE, bp.VARIANT)
+            if key in self.data:
+                raise Exception("Trying to overwrite data för: " + key)
+            self.data[key] = bp
+
+
+    def get_data(self, chromosome, start, stop, reference, variant):
+        return self.data.get("{}:{}:{}:{}:{}".format(chromosome, start, stop, reference, variant), None)
 
 class Hotspot(object):
     def __init__(self, CHROMOSOME, START, END, GENE, CDS_MUTATION_SYNTAX, AA_MUTATION_SYNTAX, REPORT, COMMENT, EXON, ACCESSION_NUMBER):
@@ -76,16 +112,60 @@ class Hotspot(object):
         if not _exon_intron_pattern.match(self.EXON):
             raise ValueError("Exon value should have the following format: exon or intronic. not %" % self.EXON)
 
-        self.TOTAL_DEPTH = ["-"] * (self.END - self.START + 1)
-        self.VARIANTS = []
+        self.DEPTH_VARIANTS = [{'depth': "-", 'extended': False, 'variants': []} for i in range((self.END - self.START + 1))]
+
+        self.EXTENDED_START = self.START
+        self.EXTENDED_END = self.END
+
+    def check_overlapp(self, chrom, region_start, region_stop, start,stop=None):
+        #print(self.CHROMOSOME + " == " + chrom + " and (( " + str(stop) + " is not None and " + str(region_start) + " <= " + str(stop) + " and " + str(start) + " <= " + str(region_stop) + ") or (" + str(region_start) + " <= " + str(start) + " <= " + str(region_stop) + ")) " + str(self.CHROMOSOME == chrom) + " " + str((stop is not None and region_start <= stop and start <= region_stop)))
+        return  self.CHROMOSOME == chrom and ((stop is not None and region_start <= stop and start <= region_stop) or (region_start <= start <= region_stop))
 
 
-    def check_overlapp(self, start,stop=None):
-        return  (stop and self.START <= stop <= self.END) or (self.START <= start <= self.END)
+    def add_variant(self, variant, chr_translater):
+        if isinstance(variant, pysam.VariantRecord):
+            v_start = variant.start + 1
+            v_stop = variant.stop + 1
+            #print(str(variant))
+            if self.check_overlapp(chr_translater.get_nc_value(variant.chrom), self.START, self.END, v_start , v_stop):
+                if self.EXTENDED_END < v_stop or v_start < self.EXTENDED_START:
+                    if variant.start < self.EXTENDED_START or self.EXTENDED_END < variant.stop:
+                        new_start = min(v_start,self.EXTENDED_START)
+                        new_end = max(v_stop, self.EXTENDED_END)
+                        new_depth_var = []
+                        for i in range(new_end - new_start + 1):
+                            if self.START <= i + new_start <= self.END:
+                                new_depth_var.append(self.DEPTH_VARIANTS[new_start - self.EXTENDED_START + i])
+                            else:
+                                new_depth_var.append({'depth': "-", 'extended': True, 'variants': []})
+                        #print(str(self.DEPTH_VARIANTS))
+                        self.DEPTH_VARIANTS = new_depth_var
+                        self.EXTENDED_START = new_start
+                        self.EXTENDED_END = new_end
+                position = self.START - self.EXTENDED_START
+                #if vcf.is_indel(variant):
+                #    position = position
+                #print("Adding var .. " + str(self.DEPTH_VARIANTS[position]['extended'])  + "\t" + str(v_start) +"\t" + str(position) + "\t" + str(self.EXTENDED_START) + "\t" + str(self.EXTENDED_END) + "\t" + str(self.START) + "\t" + str(self.END))
+                try:
+                    self.DEPTH_VARIANTS[position]['variants'].append(variant)
+                except IndexError:
+                    position = 0
+                    self.DEPTH_VARIANTS[position]['variants'] = [variant]
+                except:
+                    self.DEPTH_VARIANTS[position]['variants'] = [variant]
+                #print(str(self.DEPTH_VARIANTS))
+                return True
+        return False
 
-
-    def add_variant(self, variant):
-        self.variants.append(variant)
+    def add_depth(self, depth, chr_translater):
+        if isinstance(depth, PileupPosition):
+            #print("Checking: " + str(depth)+ "\t" + str(depth.POSITION))
+            if self.check_overlapp(chr_translater.get_nc_value(depth.CHROMOSOME), self.EXTENDED_START, self.EXTENDED_END, depth.POSITION, None):
+                #print("Adding depth: " + str(depth)+ "\t" + str(depth.POSITION))
+                #print(depth.POSITION-self.EXTENDED_START)
+                self.DEPTH_VARIANTS[depth.POSITION-self.EXTENDED_START]['depth'] = int(depth.DEPTH)
+                return True
+        return False
 
 class ChrTranslater(object):
     def __init__(self, mapper_file):
