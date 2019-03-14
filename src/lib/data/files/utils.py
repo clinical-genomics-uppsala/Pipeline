@@ -59,6 +59,11 @@ def get_ref_sequence(variant):
         else:
             return variant.alleles[0]
 
+def get_qual(variant):
+    if isinstance(variant, pysam.VariantRecord):
+        return variant.qual
+
+
 def get_var_sequence(variant):
     if isinstance(variant, pysam.VariantRecord):
         if len(variant.alleles) != 2:
