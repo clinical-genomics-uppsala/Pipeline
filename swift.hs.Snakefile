@@ -14,7 +14,7 @@ def generate_file_output_fastq():
     return [os.path.join("fastq", str(row.Index)+ ending) for row in samples.itertuples() for ending in [".0000.consensus.1.R1.fq", ".0000.consensus.1.R2.fq"]]
 
 def generate_file_output_vcf():
-    return [os.path.join("variants", str(row.Index)+ ending) for row in samples.itertuples() for ending in [".0000-consensus3.lofreq.vcf"]]
+    return [os.path.join("variants", str(row.Index)+ ending) for row in samples.itertuples() for ending in [".0000-consensus3.lofreq.annovar.vcf"]]
 
 rule all:
     input:

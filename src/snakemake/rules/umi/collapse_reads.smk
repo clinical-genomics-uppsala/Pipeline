@@ -108,7 +108,7 @@ rule pre_collapse_prep_groupreads_by_umi:
     log:
         "logs/umis_collapse/{sample}.{part}.merged.fgbioGroup.txt"
     params:
-        extra="-s adjacency --edits 1"
+        extra="-s adjacency --edits 1 -Xms500m -Xmx64g"
     wrapper:
         "0.31.1/bio/fgbio/groupreadsbyumi"
 
