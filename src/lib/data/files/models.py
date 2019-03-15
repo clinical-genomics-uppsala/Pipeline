@@ -12,7 +12,7 @@ import src.lib.data.files.vcf as vcf
 _cds_pattern =  re.compile(r'^c\..+|^-$')
 _aa_pattern =  re.compile(r'^p\..+|^-$')
 _exon_intron_pattern =  re.compile(r'^exon\d+$|^intronic$')
-_chr_pattern =  re.compile(r'^chr\d+$|^\d+$')
+_chr_pattern =  re.compile(r'^chr[XYM0-9]+$|^[XYM0-9]+$')
 _nc_pattern =  re.compile(r'^NC_0+\d+\.\d+$')
 
 
@@ -178,7 +178,7 @@ class ChrTranslater(object):
                         self.chr_to_nc[columns[1]] = columns[0]
                         self.nc_to_chr[columns[0]] = columns[1]
                     else:
-                        raise Exception("Unexpected column values for column 1/2")
+                        raise Exception("Unexpected column values for column 1/2: {}".format(line))
 
     def get_chr_value(self, nc_id):
         return self.nc_to_chr[nc_id]

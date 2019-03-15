@@ -56,9 +56,20 @@ rule lofreq_add_AD_filed:
     input:
         "variants/{sample}.{part}.tmp.merged.contigs.lofreq.vcf"
     output:
-         _lofreq_output
+         temp("variants/{sample}.{part}.tmp.merged.contigs.ad.lofreq.vcf")
     log:
         "logs/lofreq/{sample}.{part}.merge.ad.log"
     run:
         from src.lib.data.files.vcf import add_AD_field_using_DP4
         add_AD_field_using_DP4(input[0],output[0])
+
+rule lofreq_move_data_to_format_field:
+    input:
+        "variants/{sample}.{part}.tmp.merged.contigs.ad.lofreq.vcf"
+    output:
+         _lofreq_output
+    log:
+        "logs/lofreq/{sample}.{part}.merge.format.log"
+    run:
+        from src.lib.data.files.vcf import create_sample_format_from_info_lofreq
+        create_sample_format_from_info_lofreq(wildcards.sample, input[0],output[0])

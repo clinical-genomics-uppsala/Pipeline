@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import re
+import gzip
 
 from .models import PileupPosition
 
@@ -12,12 +13,11 @@ class Reader(object):
         if not filename:
             raise Exception("A filepath needs to be specified: %" % filepath)
 
-        if compressed:
-            self._reader = codecs.getreader(encoding)(self._reader)
-        else:
-            if compressed is None:
-                compressed = filename.endswith('.gz')
-        self._reader = open(filename, 'rb' if compressed else 'rt')
+        if compressed is None:
+            compressed = filename.endswith('.gz')
+
+        self._reader = gzip.open(filename, 'rt') if compressed else open(filename,'rt')
+
         self.filename = filename
 
         self.reader = (line.strip() for line in self._reader if line.strip())

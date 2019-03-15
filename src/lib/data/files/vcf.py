@@ -28,6 +28,26 @@ def add_contigs_to_header(input_name, output_name, contig_file, assembly):
     for record in input_vcf:
         output_vcf.write(record)
 
+def create_sample_format_from_info_lofreq(sample, input_name, output_name):
+    input_vcf = VariantFile(input_name,'r')
+    input_vcf.header.formats.add("AF", number=1, type='Float', description="Allele Frequency")
+    input_vcf.header.formats.add("AD", number=".", type='String', description="Allelic sample depths for the ref and alt alleles in the order listed")
+    input_vcf.header.formats.add("DP", number=1, type='Integer', description="Approximate read depth (reads with MQ=255 or with bad mates are filtered)")
+    input_vcf.header.formats.add("DP4", number=4, type='Integer', description="Counts for ref-forward bases, ref-reverse, alt-forward and alt-reverse bases")
+    input_vcf.header.formats.add("GT", number=".", type="String", description="Genotype")
+
+    input_vcf.header.add_sample(sample)
+    output_vcf = VariantFile(output_name,'w', header=input_vcf.header)
+    for record in input_vcf:
+        ad = record.info["AD"]
+        af = record.info["AF"]
+        dp = 0
+        for d in ad:
+            dp = dp + int(d)
+        new_record = output_vcf.new_record(record.chrom,record.start,record.stop,record.alleles, record.id, record.qual,record.filter,record.info,[{"AF": af, "DP4": record.info["DP4"], "DP": dp, "AD": ad, "GT": (None,record.alleles[0])}]) #, 
+        output_vcf.write(new_record)
+
+
 def process_annovar_refseq(data, gene, prefered_transcripts):
     genes = []
     transcripts = []

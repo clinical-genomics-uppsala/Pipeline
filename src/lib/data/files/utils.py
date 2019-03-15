@@ -18,7 +18,7 @@ def get_annoation_data(variant,info_name):
 
 def get_sample_value(variant, sample):
     if isinstance(variant, pysam.VariantRecord):
-        return variant.samples['SAMPLE']
+        return variant.samples[sample]
 
 
 def get_vaf(variant,sample):
