@@ -29,6 +29,8 @@ include: "../rules/fastq/headcrop_read.smk"
 
 include: "../rules/umi/extract_umis_read_head.smk"
 
+include: "../rules/fastq/fastqc.smk"
+
 bwa_mem_input = ["fastq/{sample}.{part}.fq1.fastq.gz", "fastq/{sample}.{part}.fq2.headcrop10.fastq.gz"]
 include: "../rules/alignment/bwa_mem.smk"
 
