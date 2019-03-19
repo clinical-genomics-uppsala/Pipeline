@@ -7,7 +7,7 @@ wildcard_constraints:
     unit="[A-Za-z0-9]+",
     sample="[A-Za-z0-9-]+",
     read="[fq12]+",
-    part="\d{4}|\d{4}-consensus\d+|", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
+    part="\d{4}|\d{4}-consensus\d+|\d{4}-consensus\d+\.primerclip\.rg", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
     consensus="\d{4}-consensus\d+"
 
 singularity: "/projects/wp1/nobackup/ngs/utveckling/workspace/swift/Pipeline/singularity/swift_hs.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
@@ -41,6 +41,8 @@ merge_bam_input = lambda wildcards: ["alignment/{}.{}.umiAnnoBam.bam".format(wil
 merge_bam_output = "alignment/{sample}.0000.bam"
 include: "../rules/alignment/merge_bam.smk"
 
+include: "../rules/alignment/samstats.smk"
+
 collapse_reads_input="alignment/{sample}.{part}.bam"
 collapse_reads_output="alignment/{sample}.{part,\d{4}}-consensus{num_support}.primerclip_input.bam"
 include: "../rules/umi/collapse_reads.smk"
@@ -53,9 +55,10 @@ add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
 add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
 include: "../rules/alignment/add_replace_read_group.smk"
 
+include: "../rules/alignment/samstats.smk"
+
 lofreq_input=_add_replace_read_group_output
 include: "../rules/callers/lofreq.smk"
-
 
 annovar_table_output="variants/{sample}.{part}.lofreq.annovar.vcf"
 annovar_table_input=_lofreq_output
