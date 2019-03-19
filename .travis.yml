@@ -10,5 +10,10 @@ install:
 script:
   # run the workflow
   # put a test case into the subfolder .test (e.g., use https://github.com/snakemake-workflows/ngs-test-data as a submodule)
-  - python -m src.tests.lib.data.files.test_vcf
+  - python -m src.tests.lib.data.files.test_hotspot
+  - python -m src.tests.lib.data.files.test_models
+  - python -m src.tests.lib.data.files.test_multibp
+  - python -m src.tests.lib.data.files.test_pileup
   - python -m src.tests.lib.data.files.test_reference
+  - python -m src.tests.lib.data.files.test_vcf
+  - python -m src.tests.lib.data.report.test_wp1

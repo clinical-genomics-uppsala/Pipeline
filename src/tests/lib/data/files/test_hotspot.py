@@ -59,8 +59,8 @@ class TestHotspots(unittest.TestCase):
         self.assertEqual("-", record.COMMENT)
         self.assertEqual("exon4", record.EXON)
         self.assertEqual("NM_002524", record.ACCESSION_NUMBER)
-        self.assertEqual(160, len(record.TOTAL_DEPTH))
-        self.assertEqual(["-"]*160, record.TOTAL_DEPTH)
+        self.assertEqual(160, len(record.DEPTH_VARIANTS))
+        self.assertListEqual([{"depth": "-", 'extended': False, "variants": []} for i in range(160)], record.DEPTH_VARIANTS)
 
         record = reader.next()
         self.assertEqual("NC_000001.10", record.CHROMOSOME)
@@ -73,8 +73,8 @@ class TestHotspots(unittest.TestCase):
         self.assertEqual("-", record.COMMENT)
         self.assertEqual("exon4", record.EXON)
         self.assertEqual("NM_002524", record.ACCESSION_NUMBER)
-        self.assertEqual(1, len(record.TOTAL_DEPTH))
-        self.assertEqual(["-"], record.TOTAL_DEPTH)
+        self.assertEqual(1, len(record.DEPTH_VARIANTS))
+        self.assertEqual([{"depth": "-", 'extended': False, "variants": []}], record.DEPTH_VARIANTS)
 
         record = reader.next()
         self.assertEqual("NC_000017.10", record.CHROMOSOME)
@@ -87,8 +87,8 @@ class TestHotspots(unittest.TestCase):
         self.assertEqual("-", record.COMMENT)
         self.assertEqual("exon20", record.EXON)
         self.assertEqual("NM_004448", record.ACCESSION_NUMBER)
-        self.assertEqual(186, len(record.TOTAL_DEPTH))
-        self.assertEqual(["-"]*186, record.TOTAL_DEPTH)
+        self.assertEqual(186, len(record.DEPTH_VARIANTS))
+        self.assertEqual([{"depth": "-", 'extended': False, "variants": []} for i in range(186)], record.DEPTH_VARIANTS)
 
         record = reader.next()
         self.assertEqual("NC_000012.11", record.CHROMOSOME)
@@ -101,8 +101,8 @@ class TestHotspots(unittest.TestCase):
         self.assertEqual("-", record.COMMENT)
         self.assertEqual("exon2", record.EXON)
         self.assertEqual("NM_004985", record.ACCESSION_NUMBER)
-        self.assertEqual(1, len(record.TOTAL_DEPTH))
-        self.assertEqual(["-"], record.TOTAL_DEPTH)
+        self.assertEqual(1, len(record.DEPTH_VARIANTS))
+        self.assertEqual([{"depth": "-", 'extended': False, "variants": []}], record.DEPTH_VARIANTS)
 
         record = reader.next()
         self.assertEqual("NC_000017.10", record.CHROMOSOME)
@@ -115,8 +115,8 @@ class TestHotspots(unittest.TestCase):
         self.assertEqual("-", record.COMMENT)
         self.assertEqual("exon20", record.EXON)
         self.assertEqual("NM_004448", record.ACCESSION_NUMBER)
-        self.assertEqual(2, len(record.TOTAL_DEPTH))
-        self.assertEqual(["-", "-"], record.TOTAL_DEPTH)
+        self.assertEqual(2, len(record.DEPTH_VARIANTS))
+        self.assertEqual([{"depth": "-", 'extended': False, "variants": []},{"depth": "-", 'extended': False, "variants": []}], record.DEPTH_VARIANTS)
 
         with self.assertRaises(StopIteration):
             reader.next()

@@ -57,9 +57,14 @@ include: "../rules/alignment/add_replace_read_group.smk"
 
 include: "../rules/alignment/samstats.smk"
 
+mpileup_input=add_replace_read_group_output
+include: "../rules/alignment/mpileup.smk"
+
 lofreq_input=_add_replace_read_group_output
 include: "../rules/callers/lofreq.smk"
 
 annovar_table_output="variants/{sample}.{part}.lofreq.annovar.vcf"
 annovar_table_input=_lofreq_output
 include: "../rules/annotation/annovar_table.smk"
+
+include: "../rules/reports/filter_mutations.smk"
