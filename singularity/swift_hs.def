@@ -23,6 +23,7 @@ Include: yum wget
     ### Using pip
     pip install git+https://bitbucket.org/snakemake/snakemake.git@v5.4.2
     #pip install cutadapt==1.8.0
+    pip install multiqc=1.7
     pip install pandas
     pip install pytools
     pip install pyvcf
