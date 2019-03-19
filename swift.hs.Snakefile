@@ -6,7 +6,8 @@ samples = pd.read_table(config["samples"], index_col="sample")
 units = pd.read_table(config["units"], index_col=["sample", "unit"], dtype=str)
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
-qc_files = [("qc", "html"),("qc" ,"zip")]
+qc_files = [("fastqc", "html"),("fastqc" ,"zip")]
+samstats_files = [("samstats", "0000.bam.html"), ("samstats", "0000-consensus3.primerclip.rg.bam.html")]
 
 def generate_file_output_bam():
     return [os.path.join("alignment", str(row.Index)+ ending) for row in samples.itertuples() for ending in [".0000-consensus3.primerclip.bam"]]
@@ -22,12 +23,17 @@ def generate_filtered_mutations():
     return [os.path.join("reports", str(row.Index)+ ".0000-consensus3.lofreq.filteredMutation.tsv") for row in samples.itertuples()]
 
 def generate_qc_reports():
-    return [os.path.join(f[0],"fastqc",  str(row.Index[0]) + "." + str(row.Index[1]) + "." + f[1])
+    return [os.path.join("qc", f[0],  str(row.Index[0]) + "." + str(row.Index[1]) + "." + f[1])
         for row in units.itertuples()
             for f in qc_files]
+
+def generate_samstats_reports():
+    return [os.path.join("qc", f[0],  str(row.Index[0]) + "." + f[1])
+        for row in units.itertuples()
+            for f in samstats_files]
 rule all:
     input:
-        generate_qc_reports() + generate_filtered_mutations() #generate_file_output_fastq() + generate_file_output_bam()
+        generate_samstats_reports() + generate_qc_reports() + generate_filtered_mutations() #generate_file_output_fastq() + generate_file_output_bam()
         #[*generate_file_output_fastq(), *generate_file_output_bam()]
         #["alignment/JI-2.L001-0003.bam", "alignment/JI-2.L001-0004.bam", "alignment/JI-2.L001-0000.bam", "alignment/JI-2.L001-0001.bam", "alignment/JI-2.L001-0002.bam"] #generate_file_output_bam()
 
