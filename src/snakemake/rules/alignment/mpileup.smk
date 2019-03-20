@@ -49,11 +49,11 @@ except:
 
 rule mpileup:
     input:
-        _mpileup_input
+        bam=_mpileup_input,
+        reference_genome=config['reference_genome']
     output:
         _mpileup_output
     params:
-        reference_genome=config['reference_genome'],
         extra="-d 100000000000 -ABQ0"
     threads: 8
     wrapper:

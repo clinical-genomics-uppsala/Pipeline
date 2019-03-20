@@ -62,7 +62,7 @@ rule merge_bam:
         _merge_bam_input
     output:
         temp("alignment/.tmp/{sample}.0000.merged.bam")
-    threads: 8
+    threads: 16
     wrapper:
         "0.31.1/bio/samtools/merge"
 

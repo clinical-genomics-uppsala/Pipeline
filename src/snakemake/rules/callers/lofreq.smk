@@ -26,7 +26,7 @@ rule lofreq:
         "logs/lofreq/{sample}.{part}.calling.log"
     threads: 3
     wrapper:
-        "lofreq-wrapper/bio/lofreq/call"
+        "master/bio/lofreq/call"
 
 rule merge_lofreq_indels:
     input:
