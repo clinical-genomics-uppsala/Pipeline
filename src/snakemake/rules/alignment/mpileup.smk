@@ -57,4 +57,4 @@ rule mpileup:
         extra="-d 100000000000 -ABQ0"
     threads: 8
     wrapper:
-        "mpileup/bio/samtools/mpileup"
+        "master/bio/samtools/mpileup"
