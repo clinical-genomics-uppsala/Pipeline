@@ -1,11 +1,39 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+__author__="Patrik Smeds"
+__copyright__ = "Copyright 2019, Patrik Smeds"
+__email__ = "patrik.smeds@scilifelab.uu.se"
+__license__ = "MIT"
+
+_generate_filtered_mutations_wp1_input_vcf = "variants/{sample}.{part}.{caller}.annovar.vcf"
+try:
+    _generate_filtered_mutations_wp1_input_vcf = generate_filtered_mutations_wp1_input_vcf
+except:
+    pass
+
+_generate_filtered_mutations_wp1_input_pileup = "pileup/{sample}.{part}.mpileup.gz"
+try:
+    _generate_filtered_mutations_wp1_input_pileup = generate_filtered_mutations_wp1_input_pileup
+except:
+    pass
+
+_generate_filtered_mutations_wp1_output = "reports/{sample}.{part}.{caller}.filteredMutation.tsv"
+try:
+    _generate_filtered_mutations_wp1_output = generate_filtered_mutations_wp1_output
+except:
+    pass
+
 from src.lib.data.report.wp1 import generate_filtered_mutations
 
 rule generate_filtered_mutations_wp1:
   input:
-      vcf="variants/{sample}.{part}.{caller}.annovar.vcf",
-      pileup="pileup/{sample}.{part}.mpileup.gz"
+      vcf=_generate_filtered_mutations_wp1_input_vcf,
+      pileup=_generate_filtered_mutations_wp1_input_pileup
   output:
-      "reports/{sample}.{part}.{caller}.filteredMutation.tsv"
+      _generate_filtered_mutations_wp1_output
+  log:
+      "logs/filter_mutations/{sample}.{part}.{caller}.log"
   params:
       levels = config['depth_levels'],
       hotspot = lambda wildcards:  samples['hotspot'][wildcards.sample],
