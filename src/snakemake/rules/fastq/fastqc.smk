@@ -24,7 +24,7 @@ try:
 except:
     pass
 
-rule import_read:
+rule fastqc:
     input:
         _fastqc_input
     output:

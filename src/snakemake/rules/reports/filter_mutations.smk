@@ -12,7 +12,7 @@ try:
 except:
     pass
 
-_generate_filtered_mutations_wp1_input_pileup = "variants/{sample}.{part}.{caller}.annovar.pileup"
+_generate_filtered_mutations_wp1_input_pileup = "pileup/{sample}.{part}.mpileup.gz"
 try:
     _generate_filtered_mutations_wp1_input_pileup = generate_filtered_mutations_wp1_input_pileup
 except:

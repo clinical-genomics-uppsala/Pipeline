@@ -55,6 +55,7 @@ add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
 add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
 include: "../rules/alignment/add_replace_read_group.smk"
 
+
 include: "../rules/alignment/samtool_stats.smk"
 include: "../rules/alignment/samtool_flagstats.smk"
 
@@ -68,10 +69,11 @@ annovar_table_output="variants/{sample}.{part}.lofreq.annovar.vcf"
 annovar_table_input=_lofreq_output
 include: "../rules/annotation/annovar_table.smk"
 
-multiqc_input =  [ "qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + "_fastqc.zip" for unit in units.itertuples()]  + \
-                 ["qc/samtool/stats/" + str(unit.Index[0]) + ".0000.bam.txt" for unit in units.itertuples()] + \
+multiqc_input =  ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + "_fastqc.zip" for unit in units.itertuples()]  + \
                  ["qc/samtool/stats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.txt" for unit in units.itertuples()] + \
                  ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000.bam.flagstats" for unit in units.itertuples()] + \
                  ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.flagstats" for unit in units.itertuples()]
+                 #["qc/samtool/stats/" + str(unit.Index[0]) + ".0000.bam.txt" for unit in units.itertuples()] + \
+                 #["logs/umis/" + str(unit.Index[0]) + ".fgbioAnnoBam.txt" for unit in units.itertuples()] + \
 include: "../rules/reports/multiqc.smk"
 include: "../rules/reports/filter_mutations.smk"
