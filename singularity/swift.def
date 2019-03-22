@@ -23,7 +23,7 @@ Include: yum wget
     ### Using pip
     pip install git+https://bitbucket.org/snakemake/snakemake.git@v5.4.2
     #pip install cutadapt==1.8.0
-    pip install multiqc=1.7
+    pip install multiqc==1.7
     pip install pandas
     pip install pytools
     pip install pyvcf
@@ -31,6 +31,7 @@ Include: yum wget
     conda install -c bioconda pigz=2.4
     conda install -c bioconda biopython=1.72
     conda install -c bioconda bwa=0.7.12
+    conda install -c gatk=3.8
     conda install -c bioconda fastqc=0.11.8
     conda install -c bioconda fgbio=0.7.0
     conda install -c bioconda lofreq=2.1.3.1-0

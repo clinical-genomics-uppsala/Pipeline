@@ -4,7 +4,7 @@
 def InfoImporter(input_file):
     """
         Import a reference info file with the following format:
-        #Chr name   NC   ID   Length
+        #Chr name   NC ID    Genome Reference Name  Length
         chr1   NC_000001.9   Chr1#NC_000001.9#1#247249719#-1   247249719
         chr2   NC_000002.10   Chr2#NC_000002.10#1#242951149#-1   242951149
 
@@ -18,5 +18,5 @@ def InfoImporter(input_file):
         header_map = {item[1].lower(): item[0] for item in enumerate(header.rstrip().lstrip("#").split("\t"))}
         for row in reference_info:
             columns = row.rstrip().split("\t")
-            reference_data[columns[header_map['chr name']]] = {'nc': columns[header_map['nc']], 'length': int(columns[header_map['length']])}
+            reference_data[columns[header_map['chr name']]] = {'nc': columns[header_map['nc id']], 'length': int(columns[header_map['length']])}
     return reference_data

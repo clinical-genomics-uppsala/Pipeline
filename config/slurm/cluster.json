@@ -15,6 +15,7 @@
     "pre_collapse_prep_groupreads_by_umi": {"n": 16},
     "pre_collapse_prep_sanitised_queryname": {"n": 8},
     "pre_collapse_prep_sort_queryname": {"n": 8},
+    "collapse_reads_create_consensus_reads": {"n": 8},
     "lofreq": {"n": 3},
 
 }

@@ -19,8 +19,6 @@ try:
 except:
     pass
 
-from src.lib.data.report.wp1 import generate_filtered_mutations
-
 rule multiqc:
   input:
       _multiqc_input

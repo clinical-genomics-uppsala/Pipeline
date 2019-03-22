@@ -10,7 +10,7 @@ wildcard_constraints:
     part="\d{4}|\d{4}-consensus\d+|\d{4}-consensus\d+\.primerclip\.rg", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
     consensus="\d{4}-consensus\d+"
 
-singularity: "/projects/wp1/nobackup/ngs/utveckling/workspace/swift/Pipeline/singularity/swift_hs.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
+singularity: "/projects/wp1/nobackup/ngs/utveckling/software/Pipeline/singularity/swift_hs.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
 
 def _get_split_and_unit_part_files(wildcards, units, config):
     num_splits = config.get("num_fastq_split", 1)
@@ -40,8 +40,6 @@ include: "../rules/umi/annotate_bam_with_umi.smk"
 merge_bam_input = lambda wildcards: ["alignment/{}.{}.umiAnnoBam.bam".format(wildcards.sample,unit_part) for unit_part in _get_split_and_unit_part_files(wildcards,units,config)]
 merge_bam_output = "alignment/{sample}.0000.bam"
 include: "../rules/alignment/merge_bam.smk"
-
-include: "../rules/alignment/samstats.smk"
 
 collapse_reads_input="alignment/{sample}.{part}.bam"
 collapse_reads_output="alignment/{sample}.{part,\d{4}}-consensus{num_support}.primerclip_input.bam"
