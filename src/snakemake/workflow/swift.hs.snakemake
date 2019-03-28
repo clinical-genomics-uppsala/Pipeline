@@ -10,7 +10,7 @@ wildcard_constraints:
     part="\d{4}|\d{4}-consensus\d+|\d{4}-consensus\d+\.primerclip\.rg", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
     consensus="\d{4}-consensus\d+"
 
-singularity: "/projects/wp1/nobackup/ngs/utveckling/software/Pipeline/singularity/swift_hs.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
+singularity: "/projects/wp1/nobackup/ngs/utveckling/software/Pipeline/singularity/swift.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
 
 def _get_split_and_unit_part_files(wildcards, units, config):
     num_splits = config.get("num_fastq_split", 1)
@@ -53,14 +53,23 @@ add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
 add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
 include: "../rules/alignment/add_replace_read_group.smk"
 
-
 include: "../rules/alignment/samtool_stats.smk"
 include: "../rules/alignment/samtool_flagstats.smk"
 
-mpileup_input=add_replace_read_group_output
+gatk3_indelrealignment_input=add_replace_read_group_output
+gatk3_indelrealignment_output="alignment/{sample}.{part}.indelrealigned.bam"
+include: "../rules/alignment/gatk3_indelrealignment.smk"
+
+mpileup_input=gatk3_indelrealignment_output
 include: "../rules/alignment/mpileup.smk"
 
-lofreq_input=_add_replace_read_group_output
+gatk3_baserecalibrator_input=add_replace_read_group_output
+gatk3_baserecalibrator_input_realigned=gatk3_indelrealignment_output
+gatk3_baserecalibrator_output="alignment/{sample}.{part}.bsqr.bam"
+#include: "../rules/alignment/gatk_baserecalibrator.smk"
+include: "../rules/alignment/gatk3_baserecalibrator.smk"
+
+lofreq_input=gatk3_baserecalibrator_output
 include: "../rules/callers/lofreq.smk"
 
 annovar_table_output="variants/{sample}.{part}.lofreq.annovar.vcf"

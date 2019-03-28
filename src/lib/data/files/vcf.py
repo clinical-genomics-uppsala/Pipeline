@@ -28,7 +28,7 @@ def add_contigs_to_header(input_name, output_name, contig_file, assembly):
     for record in input_vcf:
         output_vcf.write(record)
 
-def create_sample_format_from_info_lofreq(sample, input_name, output_name):
+def create_sample_format_from_info_lofreq(sample, input_name, output_name, skip_gt=False):
     input_vcf = VariantFile(input_name,'r')
     input_vcf.header.formats.add("AF", number=1, type='Float', description="Allele Frequency")
     input_vcf.header.formats.add("AD", number=".", type='String', description="Allelic sample depths for the ref and alt alleles in the order listed")
@@ -44,7 +44,8 @@ def create_sample_format_from_info_lofreq(sample, input_name, output_name):
         dp = 0
         for d in ad:
             dp = dp + int(d)
-        new_record = output_vcf.new_record(record.chrom,record.start,record.stop,record.alleles, record.id, record.qual,record.filter,record.info,[{"AF": af, "DP4": record.info["DP4"], "DP": dp, "AD": ad, "GT": (None,record.alleles[0])}]) #, 
+        fields = {"AF": af, "DP4": record.info["DP4"], "DP": dp, "AD": ad, "GT": (record.alleles[1],record.alleles[0])}
+        new_record = output_vcf.new_record(record.chrom,record.start,record.stop,record.alleles, record.id, record.qual,record.filter,record.info,[fields]) #,
         output_vcf.write(new_record)
 
 

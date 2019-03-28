@@ -53,11 +53,12 @@ except:
     pass
 
 if _cgu_get_num_splits(config) > 1:
-    _split_fastq_output = temp("fastq/{sample}.{unit,[A-Za-z0-9]+-\d{4}}.{read}.fastq.gz")
+    _split_fastq_output = temp("fastq/{sample}.{part,[A-Za-z0-9]+-\d{4}}.{read}.fastq.gz")
     try:
         _split_fastq_output = split_fastq_output
     except:
       pass
+
     rule count_lines_in_fastq:
         input:
             _split_fastq_input
