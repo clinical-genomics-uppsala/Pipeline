@@ -1,0 +1,79 @@
+BootStrap: yum
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-%{OSVERSION}/%{OSVERSION}/os/$basearch/
+Include: yum wget
+
+%environment
+    PATH=/opt/conda/bin:/usr/bin:$PATH
+
+%setup
+
+%post
+    ## Tools used to install software
+    yum install -y epel-release
+    yum install -y wget tar bzip2 gcc git fontconfig /tmp/jdk-7u80-linux-x64.rpm
+
+    CONDA_DIR=/opt/conda
+    cd /tmp && \
+      mkdir -p $CONDA_DIR && \
+      wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.4.10-Linux-x86_64.sh && \
+      echo "bec6203dbb2f53011e974e9bf4d46e93 Miniconda3-4.4.10-Linux-x86_64.sh" | md5sum -c - && \
+      /bin/bash Miniconda3-4.4.10-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
+      rm Miniconda3-4.4.10-Linux-x86_64.sh && \
+      $CONDA_DIR/bin/conda clean -tipsy
+
+    $CONDA_DIR/bin/conda config --set always_yes yes --set changeps1 no
+    ## Need to downgrade python due to cython and compiled files for datrie
+    $CONDA_DIR/bin/conda install python=3.6.0
+    $CONDA_DIR/bin/conda install pip=19.0.3=py36_0
+    ### Install software needed by CAPS
+    ### Using pip
+    $CONDA_DIR/bin/pip install git+https://bitbucket.org/snakemake/snakemake.git@v5.4.2
+    #pip install cutadapt==1.8.0
+    $CONDA_DIR/bin/pip install multiqc==1.7
+    $CONDA_DIR/bin/pip install pandas
+    $CONDA_DIR/bin/pip install pytools
+    $CONDA_DIR/bin/pip install pyvcf
+    ### Using conda, channel bioconda
+    $CONDA_DIR/bin/conda install -c bioconda pigz=2.4
+    $CONDA_DIR/bin/conda install -c bioconda biopython=1.72
+    $CONDA_DIR/bin/conda install -c bioconda bwa=0.7.12
+    $CONDA_DIR/bin/conda install -c bioconda fastqc=0.11.8
+    $CONDA_DIR/bin/conda install -c bioconda gatk4=4.1.0.0
+    $CONDA_DIR/bin/conda install -c bioconda fgbio=0.7.0
+    $CONDA_DIR/bin/conda install -c bioconda lofreq=2.1.3.1-0
+    $CONDA_DIR/bin/conda install -c bioconda picard=2.18.26-0
+    $CONDA_DIR/bin/conda install -c bioconda samtools=1.3.1
+    $CONDA_DIR/bin/conda install -c bioconda trimmomatic=0.35 --no-deps
+
+    $CONDA_DIR/bin/conda install -c bioconda gatk=3.8=py36_4
+    $CONDA_DIR/bin/gatk3-register /GenomeAnalysisTK.3.8.jar
+    ln -s /opt/conda/opt/gatk-3.8/GenomeAnalysisTK.3.8.jar /opt/conda/opt/gatk-3.8/GenomeAnalysisTK.jar
+    rm /GenomeAnalysisTK.3.8.jar
+
+    wget https://raw.githubusercontent.com/swiftbiosciences/primerclip/master/.stack-work/install/x86_64-linux/lts-11.0/8.2.2/bin/primerclip -O /usr/local/bin/primerclip
+    chmod a+x /usr/local/bin/primerclip
+    wget https://github.com/CSB5/lofreq/raw/master/src/tools/scripts/lofreq2_indel_ovlp.py -O /usr/local/bin/lofreq2_indel_ovlp.py
+    chmod +x /usr/local/bin/lofreq2_indel_ovlp.py
+    chmod +x /usr/local/bin/table_annovar.pl
+    chmod +x /usr/local/bin/annotate_variation.pl
+    chmod +x /usr/local/bin/coding_change.pl
+    chmod +x /usr/local/bin/convert2annovar.pl
+    chmod +x /usr/local/bin/retrieve_seq_from_fasta.pl
+    chmod +x /usr/local/bin/table_annovar.pl
+    chmod +x /usr/local/bin/variants_reduction.pl
+%files
+    table_annovar.pl /usr/local/bin/
+    annotate_variation.pl  /usr/local/bin/
+    coding_change.pl  /usr/local/bin/
+    convert2annovar.pl /usr/local/bin/
+    retrieve_seq_from_fasta.pl /usr/local/bin/
+    table_annovar.pl /usr/local/bin/
+    variants_reduction.pl /usr/local/bin/
+    GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar /GenomeAnalysisTK.3.8.jar
+
+%runscript
+    exec echo "This container can be run with --app snakemake"
+
+%apprun snakemake
+    exec snakemake "$@" --wrapper-prefix git+file:///snakemake-wrappers

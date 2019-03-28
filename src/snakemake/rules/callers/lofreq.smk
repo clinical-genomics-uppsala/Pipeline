@@ -21,12 +21,13 @@ rule lofreq:
         temp("variants/{sample}.{part}.tmp.lofreq.vcf")
     params:
         ref=config['reference_genome'],
-        extra="" #"-l merged_targets.bed"
+        extra="--call-indels -l merged_targets.bed" #"",
+        #bed="merged_targets.bed"
     log:
         "logs/lofreq/{sample}.{part}.calling.log"
     threads: 3
     wrapper:
-        "lofreq-wrapper/bio/lofreq/call"
+        "master/bio/lofreq/call"
 
 rule merge_lofreq_indels:
     input:

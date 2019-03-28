@@ -74,7 +74,6 @@ def get_read_level(read_levels, rd):
 
 def _print_variant(writer, caller, variant, sample, chrom, mutation_type, levels, pileup_depth, multibp, prefered_transcripts, comment):
     depth_status, found = get_read_level(levels, pileup_depth)
-    print(mutation_type + " " + str(pileup_depth) + " "+ str(levels) + " " + str(depth_status) + " " + found)
     variant_type = utils.get_annoation_data(variant, "Func.refGene")
     exonic_type = utils.get_annoation_data(variant, "ExonicFunc.refGene")
     genes = utils.get_annoation_data(variant, "Gene.refGene")

@@ -65,7 +65,7 @@ rule bwa_mem:
         _bwa_mem_output
     log:
         "logs/bwa_mem/{sample}.{part}.log"
-    threads: 3
+    threads: 16
     params:
         index=config['reference_genome'],
         extra=lambda wildcards: r"-M -R '@RG\tID:%s_%s\tSM:%s\tPL:%s'" % (get_now(),wildcards.sample, wildcards.sample, "illumina",),

@@ -14,7 +14,7 @@ class TestReference(unittest.TestCase):
         # create fixtures
         self.tempdir = tempfile.mkdtemp()
         with open(os.path.join(self.tempdir,"reference_info"),'w') as reference:
-            reference.write("#Chr name\tNC\tID\tLength\n")
+            reference.write("#Chr name\tNC ID\tGenome Reference Name\tLength\n")
             reference.write("chr1\tNC_000001.9\tChr1#NC_000001.9#1#247249719#-1\t247249719\n")
             reference.write("chr2\tNC_000002.10\tChr2#NC_000002.10#1#242951149#-1\t242951149\n")
             reference.write("chr3\tNC_000003.10\tChr3#NC_000003.10#1#199501827#-1\t199501827\n")

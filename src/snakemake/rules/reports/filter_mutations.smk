@@ -26,6 +26,8 @@ except:
 
 from src.lib.data.report.wp1 import generate_filtered_mutations
 
+localrules: generate_filtered_mutations_wp1
+
 rule generate_filtered_mutations_wp1:
   input:
       vcf=_generate_filtered_mutations_wp1_input_vcf,
