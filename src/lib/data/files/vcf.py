@@ -41,9 +41,7 @@ def create_sample_format_from_info_lofreq(sample, input_name, output_name, skip_
     for record in input_vcf:
         ad = record.info["AD"]
         af = record.info["AF"]
-        dp = 0
-        for d in ad:
-            dp = dp + int(d)
+        dp = record.info["DP"]
         fields = {"AF": af, "DP4": record.info["DP4"], "DP": dp, "AD": ad, "GT": (record.alleles[1],record.alleles[0])}
         new_record = output_vcf.new_record(record.chrom,record.start,record.stop,record.alleles, record.id, record.qual,record.filter,record.info,[fields]) #,
         output_vcf.write(new_record)

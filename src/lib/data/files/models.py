@@ -98,7 +98,7 @@ class Hotspot(object):
             raise ValueError("End position should be an integer: %s!" % self.END)
 
         if self.START > self.END:
-            raise ValueError("Start cordinte cannot be larget then stop coordinate! % > %" % (self.START, self.END))
+            raise ValueError("Start cordinte cannot be larget then stop coordinate! start:%s > stop:%s" % (self.START, self.END))
 
         if not _cds_pattern.match(self.CDS_MUTATION_SYNTAX):
             raise ValueError("Incorrect cds syntax %s! Should start with \"c.\" or set to \"-\" if empty." % self.CDS_MUTATION_SYNTAX)

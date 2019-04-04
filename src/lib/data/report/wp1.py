@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from src.lib.data.files.hotspot import Reader as HotspotReader
 from src.lib.data.files.pileup import Reader as PileupReader
 from src.lib.data.files.hotspot import ReportClass
@@ -215,11 +217,13 @@ def _print_report(writer, sample, caller, hotspot, levels, chr_translater, multi
                 _print_variant(writer, caller, var, sample, chr_translater.get_nc_value(var.chrom), utils.get_report_type(var, hotspot.REPORT), levels, depth_variant['depth'], multibp, prefered_transcripts, hotspot.COMMENT)
 
 
-def generate_filtered_mutations(sample, caller, report, levels, hotspot_file, vcf_file, pileup_file, chr_mapping, multibp_file, prefered_transcripts):
-    hotspots = []
+def generate_filtered_mutations(sample, caller, output, levels, hotspot_file, vcf_file, pileup_file, chr_mapping, multibp_file, prefered_transcripts):
+    reports = OrderedDict(((ReportClass.hotspot, []), (ReportClass.region_all, []), (ReportClass.region, []), (ReportClass.indel, [])))
     if not hotspot_file == "-":
         hotspot_reader = HotspotReader(hotspot_file)
-        hotspots = [hotspot for hotspot in iter(hotspot_reader)]
+        for hotspot in iter(hotspot_reader):
+            reports[hotspot.REPORT].append(hotspot)
+
     multibp = {}
     multibp = MultiBpVariantData(multibp_file)
     if not isinstance(prefered_transcripts, dict):
@@ -230,26 +234,35 @@ def generate_filtered_mutations(sample, caller, report, levels, hotspot_file, vc
     variants = VariantFile(vcf_file)
     other = []
     for variant in variants:
+        #ToDo make sure that empty variants are handled better!!!
+        if variant.alts is None:
+            continue
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
         added = False
-        for hotspot in hotspots:
-            if hotspot.add_variant(variant, chr_translater):
-                added = True
+        for report in reports:
+            for hotspot in reports[report]:
+                if hotspot.add_variant(variant, chr_translater):
+                    added = True
+                    break
+            if added:
+                break
         if not added:
             other.append((variant,"-"))
     for data in pileup_reader:
         added = False
-        for hotspot in hotspots:
-            if hotspot.add_depth(data, chr_translater):
-                added = True
+        for report in reports:
+            for hotspot in reports[report]:
+                if hotspot.add_depth(data, chr_translater):
+                    added = True
         for i in range(0,len(other)):
             if vcf.check_overlapp(other[i][0], data.CHROMOSOME, data.POSITION):
                 other[i] = (other[i][0], data.DEPTH)
 
-    with open(report,"w") as filtered_mutations:
+    with open(output,"w") as filtered_mutations:
         filtered_mutations.write(_create_filtered_mutations_header())
-        for hotspot in hotspots:
-            _print_report(filtered_mutations, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts)
+        for report in reports:
+            for hotspot in reports[report]:
+                _print_report(filtered_mutations, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts)
         for var in other:
             _print_variant(filtered_mutations, caller, var[0], sample, chr_translater.get_nc_value(var[0].chrom), "4-other", levels, var[1], multibp, prefered_transcripts, "-")

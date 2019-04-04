@@ -9,7 +9,7 @@ wildcard_constraints:
     read="[fq12]+",
     part="\d{4}|\d{4}.primerclip\.rg"
 
-singularity: "/projects/wp1/nobackup/ngs/utveckling/workspace/swift/Pipeline/singularity/swift_hs.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
+singularity: "/projects/wp1/nobackup/ngs/utveckling/software/Pipeline/singularity/swift.simg"
 
 def _get_split_and_unit_part_files(wildcards, units, config):
     num_splits = config.get("num_fastq_split", 1)
@@ -24,10 +24,6 @@ storage = PersistentDict("caps_mystorage")
 split_fastq_input = lambda wildcards: units.loc[(path.split(wildcards.sample)[-1], wildcards.unit), [wildcards.read]].dropna()[0]
 include: "../rules/fastq/split_fastq.smk"
 
-include: "../rules/fastq/headcrop_read.smk"
-
-include: "../rules/umi/extract_umis_read_head.smk"
-
 include: "../rules/fastq/fastqc.smk"
 
 bwa_mem_input = ["fastq/{sample}.{part}.fq1.fastq.gz", "fastq/{sample}.{part}.fq2.fastq.gz"]
@@ -37,7 +33,7 @@ merge_bam_input = lambda wildcards: ["alignment/{}.{}.bam".format(wildcards.samp
 merge_bam_output = "alignment/{sample}.0000.bam"
 include: "../rules/alignment/merge_bam.smk"
 
-include: "../rules/alignment/samstats.smk"
+include: "../rules/alignment/samtool_stats.smk"
 
 primerclip_input="alignment/{sample}.{part}.bam"
 primerclip_output="alignment/{sample}.{part}.primerclip_output.bam"
@@ -47,7 +43,6 @@ add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
 add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
 include: "../rules/alignment/add_replace_read_group.smk"
 
-include: "../rules/alignment/samtool_stats.smk"
 include: "../rules/alignment/samtool_flagstats.smk"
 
 mpileup_input=add_replace_read_group_output
@@ -63,7 +58,5 @@ include: "../rules/annotation/annovar_table.smk"
 multiqc_input =  ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + "_fastqc.zip" for unit in units.itertuples()]  + \
                  ["qc/samtool/stats/" + str(unit.Index[0]) + ".0000.primerclip.rg.bam.txt" for unit in units.itertuples()] + \
                  ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000.primerclip.rg.bam.flagstats" for unit in units.itertuples()]
-                 #["qc/samtool/stats/" + str(unit.Index[0]) + ".0000.bam.txt" for unit in units.itertuples()] + \
-                 #["logs/umis/" + str(unit.Index[0]) + ".fgbioAnnoBam.txt" for unit in units.itertuples()] + \
 include: "../rules/reports/multiqc.smk"
 include: "../rules/reports/filter_mutations.smk"

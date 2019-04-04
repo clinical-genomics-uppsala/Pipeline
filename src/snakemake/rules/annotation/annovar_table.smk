@@ -52,7 +52,7 @@ rule annovar_annotate:
     input:
         _annovar_table_input
     output:
-        _annovar_table_output
+        temp(_annovar_table_output + "tmp")
     log:
         "logs/annotate/qsort/{sample}.{part}.annovar.log"
     params:
@@ -64,3 +64,10 @@ rule annovar_annotate:
         extra=""         # optional parameters
     wrapper:
        "annovar-wrapper/bio/annovar/table_annovar"
+
+rule remove_empty_lines:
+    input:
+        _annovar_table_output + "tmp"
+    output:
+        _annovar_table_output
+    shell: r"sed -E -e 's/^[[:space:]]+//g' " + " {input} > {output}"
