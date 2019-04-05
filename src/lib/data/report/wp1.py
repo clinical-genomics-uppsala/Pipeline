@@ -234,6 +234,9 @@ def generate_filtered_mutations(sample, caller, output, levels, hotspot_file, vc
     variants = VariantFile(vcf_file)
     other = []
     for variant in variants:
+        #ToDo make sure that empty variants are handled better!!!
+        if variant.alts is None:
+            continue
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
         added = False

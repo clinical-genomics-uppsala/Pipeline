@@ -2,5 +2,5 @@ snakemake==5.2.4
 pyvcf==0.6.8
 biopython==1.70
 pandas==0.21.0
-pytools
-pysam
+pytools==2019.1
+pysam==0.15.2
