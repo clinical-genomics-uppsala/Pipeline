@@ -79,7 +79,7 @@ class MultiBpVariantData(object):
         return self.data.get("{}:{}:{}:{}:{}".format(chromosome, start, stop, reference, variant), None)
 
 class Hotspot(object):
-    def __init__(self, CHROMOSOME, START, END, GENE, CDS_MUTATION_SYNTAX, AA_MUTATION_SYNTAX, REPORT, COMMENT, EXON, ACCESSION_NUMBER, PRINT_ALL=False):
+    def __init__(self, CHROMOSOME, START, END, GENE, CDS_MUTATION_SYNTAX, AA_MUTATION_SYNTAX, REPORT, COMMENT, EXON, ACCESSION_NUMBER, ALWAYS_PRINT=False, PRINT_ALL=False):
         self.CHROMOSOME = CHROMOSOME
         self.START = START
         self.END = END
@@ -90,6 +90,7 @@ class Hotspot(object):
         self.COMMENT = COMMENT
         self.EXON = EXON
         self.ACCESSION_NUMBER = ACCESSION_NUMBER
+        self.ALWAYS_PRINT = ALWAYS_PRINT
 
         if not isinstance(self.START, int):
             raise ValueError("Start position should be an integer: %s!" % self.START)
@@ -120,15 +121,15 @@ class Hotspot(object):
         self.VARIANT_ADDED = False
 
     def check_overlapp(self, chrom, region_start, region_stop, start,stop=None):
-        #print(self.CHROMOSOME + " == " + chrom + " and (( " + str(stop) + " is not None and " + str(region_start) + " <= " + str(stop) + " and " + str(start) + " <= " + str(region_stop) + ") or (" + str(region_start) + " <= " + str(start) + " <= " + str(region_stop) + ")) " + str(self.CHROMOSOME == chrom) + " " + str((stop is not None and region_start <= stop and start <= region_stop)))
         return  self.CHROMOSOME == chrom and ((stop is not None and region_start <= stop and start <= region_stop) or (region_start <= start <= region_stop))
 
 
     def add_variant(self, variant, chr_translater):
         if isinstance(variant, pysam.VariantRecord):
+            if len(variant.ref) == 1 and len(variant.alts[0]) == 1 and self.REPORT == ReportClass.indel:
+                return False
             v_start = variant.start + 1
             v_stop = variant.stop + 1
-            #print(str(variant))
             if self.check_overlapp(chr_translater.get_nc_value(variant.chrom), self.START, self.END, v_start , v_stop):
                 if self.EXTENDED_END < v_stop or v_start < self.EXTENDED_START:
                     if variant.start < self.EXTENDED_START or self.EXTENDED_END < variant.stop:
@@ -143,7 +144,7 @@ class Hotspot(object):
                         self.DEPTH_VARIANTS = new_depth_var
                         self.EXTENDED_START = new_start
                         self.EXTENDED_END = new_end
-                position = self.START - self.EXTENDED_START
+                position = v_start - self.EXTENDED_START
                 try:
                     self.DEPTH_VARIANTS[position]['variants'].append(variant)
                 except:
@@ -154,10 +155,7 @@ class Hotspot(object):
 
     def add_depth(self, depth, chr_translater):
         if isinstance(depth, PileupPosition):
-            #print("Checking: " + str(depth)+ "\t" + str(depth.POSITION))
             if self.check_overlapp(chr_translater.get_nc_value(depth.CHROMOSOME), self.EXTENDED_START, self.EXTENDED_END, depth.POSITION, None):
-                #print("Adding depth: " + str(depth)+ "\t" + str(depth.POSITION))
-                #print(depth.POSITION-self.EXTENDED_START)
                 self.DEPTH_VARIANTS[depth.POSITION-self.EXTENDED_START]['depth'] = int(depth.DEPTH)
                 return True
         return False

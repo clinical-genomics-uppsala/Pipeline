@@ -85,7 +85,11 @@ def _print_variant(writer, caller, variant, sample, chrom, mutation_type, levels
 
     genes = utils.get_annoation_data(variant, "Gene.refGene")
     total_depth, ref_depth, var_depth = utils.get_depth(variant, sample)
-    vaf = utils.get_vaf(variant, sample)
+    try:
+        vaf = utils.get_vaf(variant, sample)
+    except ValueError as e:
+        print(str(variant) + "\t" + utils.get_start_position(variant))
+        raise e
     dbSNP_id =  utils.get_annoation_data(variant, "snp138")
     nonflagged = utils.get_annoation_data(variant, "snp138NonFlagged")
     ratio_1000g = utils.get_annoation_data(variant, "1000g2015aug_eur")
@@ -194,24 +198,25 @@ def _construct_entry(sample , gene, variant_type, exon, aa_change, cds_change, a
           variant_base = variant_base,
           all_transcripts_annotation = all_transcripts_annotation)
 
-def _print_report(writer, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts):
+def _print_report(writer, report, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts):
     for index, depth_variant in enumerate(hotspot.DEPTH_VARIANTS):
         if not depth_variant['variants'] and not depth_variant['extended']:
-            depth_status, found = get_read_level(levels, depth_variant['depth'])
-            if found == "yes":
-                found = "no"
-            writer.write("\n" + (_construct_entry(sample=sample , gene=hotspot.GENE, variant_type="-", exon=hotspot.EXON,
-                      aa_change=hotspot.AA_MUTATION_SYNTAX, cds_change=hotspot.CDS_MUTATION_SYNTAX,
-                      accession_number = hotspot.ACCESSION_NUMBER, comment=hotspot.COMMENT,
-                      report=hotspot.REPORT, found=found, min_read_depth300=depth_status, pileup_depth=depth_variant['depth'], total_read_depth="-",
-                      reference_read_depth="-", variant_read_depth="-", variant_allele_ratio="-", caller=caller, qual="-",
-                      dbsnp_id="-", ratio_1000g="-", ratio_esp6500="-", clinically_flagged_dbsnp="-",
-                      cosmic="-", clinvar_clndb="-", clinval_clinsig="-", reference_plus_amplicons="-",
-                      reference_minus_amplicons="-", variant_plus_amplicons="-" , variant_minus_amplicons="-",
-                      strands_a_ffss="-", strands_g_ffss="-", strands_c_ffss="-", strands_t_ffss="-", strands_ins="-",
-                      strands_del="-", ref_aligned_amplicons="-", var_aligned_amplicons="-",
-                      chr = hotspot.CHROMOSOME, start=(hotspot.START+index), end=(hotspot.START+index),
-                      reference_base="-", variant_base="-", all_transcripts_annotation="-")))
+            if hotspot.ALWAYS_PRINT:
+                depth_status, found = get_read_level(levels, depth_variant['depth'])
+                if found == "yes":
+                    found = "no"
+                writer.write("\n" + (_construct_entry(sample=sample , gene=hotspot.GENE, variant_type="-", exon=hotspot.EXON,
+                          aa_change=hotspot.AA_MUTATION_SYNTAX, cds_change=hotspot.CDS_MUTATION_SYNTAX,
+                          accession_number = hotspot.ACCESSION_NUMBER, comment=hotspot.COMMENT,
+                          report=hotspot.REPORT, found=found, min_read_depth300=depth_status, pileup_depth=depth_variant['depth'], total_read_depth="-",
+                          reference_read_depth="-", variant_read_depth="-", variant_allele_ratio="-", caller=caller, qual="-",
+                          dbsnp_id="-", ratio_1000g="-", ratio_esp6500="-", clinically_flagged_dbsnp="-",
+                          cosmic="-", clinvar_clndb="-", clinval_clinsig="-", reference_plus_amplicons="-",
+                          reference_minus_amplicons="-", variant_plus_amplicons="-" , variant_minus_amplicons="-",
+                          strands_a_ffss="-", strands_g_ffss="-", strands_c_ffss="-", strands_t_ffss="-", strands_ins="-",
+                          strands_del="-", ref_aligned_amplicons="-", var_aligned_amplicons="-",
+                          chr = hotspot.CHROMOSOME, start=(hotspot.START+index), end=(hotspot.START+index),
+                          reference_base="-", variant_base="-", all_transcripts_annotation="-")))
         else:
             for var in depth_variant['variants']:
                 _print_variant(writer, caller, var, sample, chr_translater.get_nc_value(var.chrom), utils.get_report_type(var, hotspot.REPORT), levels, depth_variant['depth'], multibp, prefered_transcripts, hotspot.COMMENT)
@@ -235,7 +240,8 @@ def generate_filtered_mutations(sample, caller, output, levels, hotspot_file, vc
     other = []
     for variant in variants:
         #ToDo make sure that empty variants are handled better!!!
-        if variant.alts is None:
+        if variant is None:
+            raise Exception("Empty allele found: " + str(variant))
             continue
         if not len(variant.alts) == 1:
             raise Exception("Multiple allele found: " + str(variant.alts))
@@ -263,6 +269,6 @@ def generate_filtered_mutations(sample, caller, output, levels, hotspot_file, vc
         filtered_mutations.write(_create_filtered_mutations_header())
         for report in reports:
             for hotspot in reports[report]:
-                _print_report(filtered_mutations, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts)
+                _print_report(filtered_mutations, report, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts)
         for var in other:
             _print_variant(filtered_mutations, caller, var[0], sample, chr_translater.get_nc_value(var[0].chrom), "4-other", levels, var[1], multibp, prefered_transcripts, "-")
