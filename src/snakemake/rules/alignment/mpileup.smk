@@ -54,7 +54,7 @@ rule mpileup:
     output:
         _mpileup_output
     params:
-        extra="-d 100000000000 -ABQ0"
+        extra=lambda wildcards: "-d 100000000000 -ABQ0 -l " + samples['analyzable_region'][wildcards.sample]
     threads: 8
     wrapper:
         "master/bio/samtools/mpileup"

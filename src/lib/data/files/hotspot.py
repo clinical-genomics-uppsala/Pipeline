@@ -72,4 +72,8 @@ class Reader(object):
         print_all = False
         if report == ReportClass.region or report == ReportClass.region_all:
             print_all = True
+        always_print = False
+        if report == ReportClass.hotspot
+            always_print = True
+
         return Hotspot(chrom, start, stop, gene, cds, aa, report, comment, exon, accession_numbber, print_all)
