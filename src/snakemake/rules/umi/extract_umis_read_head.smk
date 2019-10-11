@@ -43,7 +43,7 @@ try:
 except:
     pass
 
-_extract_umis_read_head_output = temp("umis/{sample}.{part,[A-Za-z0-9]+-\d{4}}.{read}.UMIs{num_bases}.fastq")
+_extract_umis_read_head_output = temp("umis/{sample}.{part,[A-Za-z0-9]+-\d{4}}.{read}.UMIs.fastq")
 try:
     _extract_umis_read_head_output = extract_umis_read_head_output
 except:
@@ -55,7 +55,7 @@ rule extract_umis_read_head:
     output:
        _extract_umis_read_head_output
     params:
-      trimmer=["CROP:%s" % config.get("fastq_extract_n_bases", 10)],
+      trimmer=["CROP:%s" % config.get("fastq_extract_n_bases", 8)],
        extra=""
     threads: 8
     wrapper:

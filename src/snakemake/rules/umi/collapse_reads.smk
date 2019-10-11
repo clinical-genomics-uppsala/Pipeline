@@ -53,16 +53,16 @@ try:
 except:
     pass
 
-
 rule pre_collapse_prep_revertsam:
     input:
         _collapse_reads_input
     output:
         temp("alignment/.{sample}.{part,\d{4}}.sanitised.bam")
     params:
-        extra="SANITIZE=true REMOVE_DUPLICATE_INFORMATION=false REMOVE_ALIGNMENT_INFORMATION=false"
+        java_options="-Xmx20",
+        extra="SANITIZE=true REMOVE_DUPLICATE_INFORMATION=false REMOVE_ALIGNMENT_INFORMATION=false TMP_DIR=alignment"
     wrapper:
-        "0.31.1/bio/picard/revertsam"
+        "master/bio/picard/revertsam"
 
 rule pre_collapse_prep_set_mate_info:
     input:
@@ -81,7 +81,7 @@ rule pre_collapse_prep_sort_queryname:
         temp("alignment/.{sample}.{part,\d{4}}.fgbio.merged.setmateinfo.qsorted.bam")
     params:
         sort_order="queryname",
-        extra="VALIDATION_STRINGENCY=LENIENT -Xms500m -Xmx20g"
+        extra="VALIDATION_STRINGENCY=LENIENT TMP_DIR=alignment -Xms500m -Xmx20g"
     threads: 8
     wrapper:
         "0.31.1/bio/picard/sortsam"
@@ -95,7 +95,7 @@ rule pre_collapse_prep_sanitised_queryname:
         "logs/umi_collapse/qsort/{sample}.{part}.log"
     params:
         sort_order="queryname",
-        extra="VALIDATION_STRINGENCY=LENIENT -Xms500m -Xmx20g"
+        extra="VALIDATION_STRINGENCY=LENIENT TMP_DIR=alignment -Xms500m -Xmx20g"
     threads: 8
     wrapper:
         "0.31.1/bio/picard/sortsam"
@@ -104,13 +104,14 @@ rule pre_collapse_prep_groupreads_by_umi:
     input:
         "alignment/.{sample}.{part}.fgbio.merged.setmateinfo.qsorted.sanitised.bam"
     output:
-        temp("alignment/.{sample}.{part,\d{4}}.merged.sanitised.setmateinfo.groupreads.bam")
+        bam=temp("alignment/.{sample}.{part,\d{4}}.merged.sanitised.setmateinfo.groupreads.bam"),
+        hist="alignment/{sample}.{part}.histo.tsv"
     log:
         "logs/umis_collapse/{sample}.{part}.merged.fgbioGroup.txt"
     params:
         extra="-s adjacency --edits 1 -Xms500m -Xmx64g"
     wrapper:
-        "0.31.1/bio/fgbio/groupreadsbyumi"
+        "fgbio-groupreads-hist-output/bio/fgbio/groupreadsbyumi"
 
 rule collapse_reads_create_consensus_reads:
     input:
@@ -120,7 +121,7 @@ rule collapse_reads_create_consensus_reads:
     log:
        "logs/umis_collapse/{sample}.{part}.merged.fgbioCMCR-{num_support}.txt"
     params:
-        extra=lambda wildcards: "-M " + wildcards.num_support
+        extra=lambda wildcards: "-M " + wildcards.num_support + " -Xms500m -Xmx64g "
     wrapper:
         "0.31.1/bio/fgbio/callmolecularconsensusreads"
 
@@ -145,7 +146,7 @@ rule bwa_concensus:
         index=config['reference_genome'],
         extra=lambda wildcards: r"-M -R '@RG\tID:" + get_now() + "_" + wildcards.sample + r"\tSM:" + wildcards.sample + r"\tPL:illumina'",
         sort="samtools",
-        sort_order="queryname",
+        sort_order="coordinate",
         sort_extra="-@ 3"
     wrapper:
         "master/bio/bwa/mem"

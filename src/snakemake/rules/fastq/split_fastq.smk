@@ -46,11 +46,13 @@ def _cgu_get_num_splits(config):
     """
     return int(config.get("num_fastq_split",1))
 
-_split_fastq_input = lambda wildcards: "fastq/‰s.%s.%s.fastq.gz" % (wildcards.sample, wildcards.unit)
+_split_fastq_input = lambda wildcards: units.loc[(wildcards.sample, wildcards.unit),wildcards.read]
 try:
     _split_fastq_input = split_fastq_input
 except:
     pass
+
+localrules: link_fastq
 
 if _cgu_get_num_splits(config) > 1:
     _split_fastq_output = temp("fastq/{sample}.{part,[A-Za-z0-9]+-\d{4}}.{read}.fastq.gz")
@@ -104,10 +106,10 @@ else:
     except:
         pass
 
-    rule copy_fastq:
+    rule link_fastq:
         input:
             _split_fastq_input
         output:
             _split_fastq_output
         run:
-            shell("cp {input} {output}")
+            shell("ln -s {input} {output}")

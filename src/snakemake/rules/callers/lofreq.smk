@@ -18,16 +18,23 @@ rule lofreq:
     input:
         _lofreq_input
     output:
-        temp("variants/{sample}.{part}.tmp.lofreq.vcf")
+        temp("variants/{sample}.{part}.tmp.lofreq.vcf.gz")
     params:
         ref=config['reference_genome'],
-        extra="--call-indels -l merged_targets.bed" #"",
-        #bed="merged_targets.bed"
+        extra=lambda wildcards: " --call-indels  -l " + samples['analyzable_region'][wildcards.sample] + " " + config['lofreq'],
     log:
         "logs/lofreq/{sample}.{part}.calling.log"
     threads: 3
     wrapper:
-        "master/bio/lofreq/call"
+        "0.34.0/bio/lofreq/call"
+
+rule uncompress_lofreq_vcf:
+    input:
+        "variants/{sample}.{part}.tmp.lofreq.vcf.gz"
+    output:
+        temp("variants/{sample}.{part}.tmp.lofreq.vcf")
+    shell:
+        "zcat {input} > {output}"
 
 rule merge_lofreq_indels:
     input:

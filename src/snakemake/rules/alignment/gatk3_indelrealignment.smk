@@ -20,7 +20,7 @@ try:
 except:
       pass
 
-_gatk3_indelrealignment_output = "alignment/{sample}.{part}.bam"
+_gatk3_indelrealignment_output = "alignment/{sample}.{part}.indelrealigned.bam"
 try:
       _gatk3_indelrealignment_output = gatk3_indelrealignment_output
 except:
@@ -29,6 +29,7 @@ except:
 rule gatk3_realignertargetcreator:
     input:
         bam=_gatk3_indelrealignment_input,
+        index=_gatk3_indelrealignment_input + ".bai",
         ref=config['reference_genome'],
         known=config['known_sites']
     output:
@@ -37,9 +38,9 @@ rule gatk3_realignertargetcreator:
         "logs/gatk/indelrealignment/{sample}.{part}.intervalscreator.log"
     params:
         extra="",  # optional
-        java_opts="-Xms100g", # optional
-        bed="merged_targets.bed"
-    threads: 16
+        java_opts="-Xms30g", # optional
+        bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
+    threads: 4
     wrapper:
         "gatk-tools/bio/gatk3/realignertargetcreator"
 
@@ -55,8 +56,8 @@ rule gatk3_indelrealigner:
         "logs/gatk/indelrealignment/{sample}.{part}.indelrealigner.log"
     params:
         extra="",  # optional
-        java_opts="-Xms100g", # optional
-        bed="merged_targets.bed",
-    threads: 16
+        java_opts="-Xms30g", # optional
+        bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
+    threads: 4
     wrapper:
         "gatk-tools/bio/gatk3/indelrealigner"
