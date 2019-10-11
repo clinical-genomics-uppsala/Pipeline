@@ -64,9 +64,6 @@ rule annotate_bam_with_umi:
         umi=_annotate_bam_with_umi_input_umi
     output:
         bam=_annotate_bam_with_umi_output
-    params:
-        extra="-Xms8g -Xmx64g"
-    threads: 8
     log:
         "logs/umis/{sample}.{part}.fgbioAnnoBam.txt"
     wrapper:
