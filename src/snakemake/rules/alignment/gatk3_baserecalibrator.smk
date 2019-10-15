@@ -4,7 +4,7 @@ try:
 except:
     pass
 
-_gatk3_baserecalibrator_input_realigned = "alignment/{sample}.{part}.indelrealigned.bam"
+_gatk3_baserecalibrator_input_realigned = "alignment/{sample}.{part}.bam"
 try:
     _gatk3_baserecalibrator_input_realigned = gatk3_baserecalibrator_input_realigned
 except:
@@ -23,7 +23,7 @@ rule gatk3_bqsr_table:
         ref=config['reference_genome'],
         known=config['known_sites']
     output:
-        temp("alignment/{sample}.{part}.recal_data_table")
+        temp("alignment/.{sample}.{part}.recal_data_table")
     log:
         "logs/gatk/bqsr/{sample}.{part}.log"
     params:
@@ -39,7 +39,7 @@ rule gatk3_bqsr_printreads:
         bam=_gatk3_baserecalibrator_input_realigned,
         #index=_gatk3_baserecalibrator_input + ".bai",
         ref=config['reference_genome'],
-        recal_data="alignment/{sample}.{part}.recal_data_table"
+        recal_data="alignment/.{sample}.{part}.recal_data_table"
     output:
         _gatk3_baserecalibrator_output
     log:
