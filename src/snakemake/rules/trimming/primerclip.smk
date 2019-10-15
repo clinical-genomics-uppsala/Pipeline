@@ -55,7 +55,7 @@ rule sort_preprimerclip_queryname:
     input:
         _primerclip_input
     output:
-        temp("alignment/{sample}.{part}.qsorted.sam")
+        temp("alignment/.{sample}.{part}.tmp-qsorted.sam")
     log:
         "logs/umi/qsort/{sample}.{part}.log"
     params:
@@ -66,10 +66,10 @@ rule sort_preprimerclip_queryname:
 
 rule primerclip:
     input:
-        sam="alignment/{sample}.{part}.qsorted.sam",
+        sam="alignment/.{sample}.{part}.tmp-qsorted.sam",
         master_file=lambda wildcards: samples['master_primerclip_file'][wildcards.sample]
     output:
-        sam=temp("alignment/{sample}.{part}.primerclip.sam")
+        sam=temp("alignment/.{sample}.{part}.tmp-qsorted-primerclip.sam")
     log:
         "logs/primerclip/{sample}.{part}.log"
     wrapper:
@@ -77,9 +77,9 @@ rule primerclip:
 
 rule primerclip_bam_generation:
     input:
-        "alignment/{sample}.{part}.primerclip.sam"
+        "alignment/.{sample}.{part}.tmp-qsorted-primerclip.sam"
     output:
-        _primerclip_output[:]
+        _primerclip_output#_primerclip_output[:]
     params:
         "-Sb"
     wrapper:

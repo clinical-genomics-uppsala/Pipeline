@@ -160,6 +160,9 @@ class Hotspot(object):
                 return True
         return False
 
+    def __str__(self):
+        return self.CHROMOSOME + ":" + str(self.START) + "-" + str(self.END)
+
 class ChrTranslater(object):
     def __init__(self, mapper_file):
         self.chr_to_nc = dict()

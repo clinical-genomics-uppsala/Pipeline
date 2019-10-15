@@ -72,16 +72,7 @@ rule coordinate_sort_mapped_reads_merged:
     output:
         _merge_bam_output
     params:
+        extra="TMP_DIR=alignment",
         sort_order="coordinate"
     wrapper:
         "0.31.1/bio/picard/sortsam"
-
-rule create_bam_index_merged:
-    input:
-        _merge_bam_output
-    output:
-        _merge_bam_output + ".bai"
-    params:
-        ""
-    wrapper:
-        "0.31.1/bio/samtools/index"

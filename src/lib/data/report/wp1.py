@@ -82,8 +82,6 @@ def _print_variant(writer, caller, variant, sample, chrom, mutation_type, levels
     if "splicing" in variant_type:
         exonic_type = variant_type
     _, transcripts, exons_introns, cds_changes, aa_changes, comm = vcf.process_annovar_refseq(utils.get_annoation_data(variant, "AAChange.refGene"), genes, prefered_transcripts)
-
-    genes = utils.get_annoation_data(variant, "Gene.refGene")
     total_depth, ref_depth, var_depth = utils.get_depth(variant, sample)
     try:
         vaf = utils.get_vaf(variant, sample)
@@ -215,7 +213,7 @@ def _print_report(writer, report, sample, caller, hotspot, levels, chr_translate
                           reference_minus_amplicons="-", variant_plus_amplicons="-" , variant_minus_amplicons="-",
                           strands_a_ffss="-", strands_g_ffss="-", strands_c_ffss="-", strands_t_ffss="-", strands_ins="-",
                           strands_del="-", ref_aligned_amplicons="-", var_aligned_amplicons="-",
-                          chr = hotspot.CHROMOSOME, start=(hotspot.START+index), end=(hotspot.START+index),
+                          chr = hotspot.CHROMOSOME, start=(hotspot.EXTENDED_START+index), end=(hotspot.EXTENDED_START+index),
                           reference_base="-", variant_base="-", all_transcripts_annotation="-")))
         else:
             for var in depth_variant['variants']:
@@ -269,6 +267,7 @@ def generate_filtered_mutations(sample, caller, output, levels, hotspot_file, vc
         filtered_mutations.write(_create_filtered_mutations_header())
         for report in reports:
             for hotspot in reports[report]:
+                #print("Print")
                 _print_report(filtered_mutations, report, sample, caller, hotspot, levels, chr_translater, multibp, prefered_transcripts)
         for var in other:
             _print_variant(filtered_mutations, caller, var[0], sample, chr_translater.get_nc_value(var[0].chrom), "4-other", levels, var[1], multibp, prefered_transcripts, "-")
