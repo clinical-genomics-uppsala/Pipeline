@@ -46,7 +46,6 @@ class Reader(object):
         line = line.lstrip("#")
         self.header = OrderedDict([(name.upper(),index) for index, name in enumerate(line.split("\t"))])
 
-
     def __iter__(self):
         return self
 

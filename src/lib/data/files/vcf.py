@@ -62,11 +62,11 @@ def process_annovar_refseq(data, gene, prefered_transcripts):
             warnings.warn("Multiple genes in variable: " + gene)
             gene = gene.split(",")
         else:
-            gene = list(gene)
+            gene = [gene]
     if data and not data == ('-',):
+        found = False
         for g in gene:
             if g in prefered_transcripts:
-                found = False
                 for d in data.split(","):
                     if prefered_transcripts[g] in d:
                         columns = d.split(":")
@@ -78,15 +78,16 @@ def process_annovar_refseq(data, gene, prefered_transcripts):
                                 gene, transcript, exon_intron, cds_change = columns
                             else:
                                 raise Exception("Unhandled number of data points when parsing refseq: {}".format(d))
-                                found = True
-                                genes.append(gene)
-                                transcripts.append(transcript)
-                                exons_introns.append(exon_intron)
-                                cds_changes.append(cds_change)
-                                aa_changes.append(aa_change)
+                            found = True
+                            genes = [gene]
+                            transcripts = [transcript]
+                            exons_introns = [exon_intron]
+                            cds_changes = [cds_change]
+                            aa_changes = [aa_change]
+                            break;
                 if not found:
                     comm = "altTranscript"
-        else:
+        if not found:
             d = data.split(",")[0] #Why only pick the first?
             columns = d.split(":")
             gene, transcript, exon_intron, cds_change, aa_change = "-", "-", "-", "-", "-"
@@ -129,7 +130,6 @@ def is_indel(variant):
 def merge_diffferent_callers(output, vcf_files):
     def add_variants(tag, vcf_files, variants):
         for var in vcf_files[tag]:
-            print("Var....")
             if len(var.alts) > 1:
                 raise Exception("Unable to handle multiple allelse on same row: " + str(var.alts))
             key = "{},{},{},{}".format(var.chrom,var.pos,var.ref,var.alts)
@@ -147,7 +147,6 @@ def merge_diffferent_callers(output, vcf_files):
     keys = iter(variants_files.keys())
     key1 = next(keys)
     f = VariantFile(output,'w', header=variants_files[key1].header)
-    print(key1)
     add_variants(key1,variants_files,variants_dict)
 
     contigs = set([c for c in f.header.contigs])
