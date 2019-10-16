@@ -130,6 +130,7 @@ class Hotspot(object):
                 return False
             v_start = variant.start + 1
             v_stop = variant.stop + 1
+
             if self.check_overlapp(chr_translater.get_nc_value(variant.chrom), self.START, self.END, v_start , v_stop):
                 if self.EXTENDED_END < v_stop or v_start < self.EXTENDED_START:
                     if variant.start < self.EXTENDED_START or self.EXTENDED_END < variant.stop:

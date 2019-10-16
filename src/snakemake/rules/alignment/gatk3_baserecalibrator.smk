@@ -48,6 +48,6 @@ rule gatk3_bqsr_printreads:
         extra="",  # optional
         java_opts="-Xms30g", # optional
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
-    threads: 4
+    threads: 8
     wrapper:
         "gatk-tools/bio/gatk3/printreads"
