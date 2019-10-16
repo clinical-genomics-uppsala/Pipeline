@@ -40,7 +40,7 @@ rule gatk3_realignertargetcreator:
         extra="",  # optional
         java_opts="-Xms30g", # optional
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
-    threads: 4
+    threads: 8
     wrapper:
         "gatk-tools/bio/gatk3/realignertargetcreator"
 
@@ -58,6 +58,6 @@ rule gatk3_indelrealigner:
         extra="",  # optional
         java_opts="-Xms30g", # optional
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
-    threads: 4
+    threads: 8
     wrapper:
         "gatk-tools/bio/gatk3/indelrealigner"

@@ -69,7 +69,7 @@ class Reader(object):
         exon = row[self.header['EXON']]
         accession_numbber = row[self.header['ACCESSION_NUMBER']]
         print_all = False
-        if report == ReportClass.region or report == ReportClass.region_all:
+        if report == ReportClass.region_all:
             print_all = True
         always_print = False
         if report == ReportClass.hotspot or report == ReportClass.region_all:
