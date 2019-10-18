@@ -26,11 +26,13 @@ Include: yum wget
     ## Need to downgrade python due to cython and compiled files for datrie
     $CONDA_DIR/bin/conda install python=3.6.0
     $CONDA_DIR/bin/conda install pip=19.0.3=py36_0
+    $CONDA_DIR/bin/pip install psutil
+    $CONDA_DIR/bin/pip install git+https://github.com/Smeds/MultiQC.git@fgbio-GroupReadsByUmi
     ### Install software needed by CAPS
     ### Using pip
     $CONDA_DIR/bin/pip install git+https://bitbucket.org/snakemake/snakemake.git@v5.4.2
     #pip install cutadapt==1.8.0
-    $CONDA_DIR/bin/pip install multiqc==1.7
+    #$CONDA_DIR/bin/pip install multiqc==1.7
     $CONDA_DIR/bin/pip install pandas
     $CONDA_DIR/bin/pip install pytools
     $CONDA_DIR/bin/pip install pyvcf
@@ -38,6 +40,7 @@ Include: yum wget
     $CONDA_DIR/bin/conda install -c bioconda pigz=2.4
     $CONDA_DIR/bin/conda install -c bioconda biopython=1.72
     $CONDA_DIR/bin/conda install -c bioconda bwa=0.7.12
+    $CONDA_DIR/bin/conda install -c bioconda bedtools=2.29.0
     $CONDA_DIR/bin/conda install -c bioconda fastqc=0.11.8
     $CONDA_DIR/bin/conda install -c bioconda gatk4=4.1.0.0
     $CONDA_DIR/bin/conda install -c bioconda fgbio=0.7.0

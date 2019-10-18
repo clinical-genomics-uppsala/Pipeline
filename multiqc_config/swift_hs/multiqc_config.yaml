@@ -1,0 +1,8 @@
+read_count_multiplier: 0.001
+read_count_prefix: k
+
+extra_fn_clean_exts:
+    - '.primerclip.rg.indelrealigned.bsqr'
+    - '.0000.histo'
+    - type: remove
+      pattern: '.0000'

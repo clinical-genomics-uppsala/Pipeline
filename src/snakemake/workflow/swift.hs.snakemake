@@ -11,7 +11,7 @@ wildcard_constraints:
     #part="\d{4}.primerclip|\d{4}-consensus\d+|\d{4}-consensus\d+\.primerclip\.rg", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
     consensus="\d{4}-consensus\d+"
 
-singularity: "/gluster-storage-volume/projects/wp1/nobackup/ngs/projekt/analys/2019/20190322_MS_JIRun3/test/Pipeline/singularity/swift.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
+singularity: config.get("singularity_image","")
 
 def _get_split_and_unit_part_files(wildcards, units, config):
     num_splits = config.get("num_fastq_split", 1)
@@ -57,6 +57,7 @@ include: "../rules/alignment/add_replace_read_group.smk"
 include: "../rules/alignment/samtool_stats.smk"
 include: "../rules/alignment/samtool_flagstats.smk"
 include: "../rules/alignment/index_bam.smk"
+include: "../rules/alignment/coveragebed.smk"
 
 #gatk3_indelrealignment_input=add_replace_read_group_output
 gatk3_indelrealignment_output="alignment/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg|\d{4}\.primerclip\.rg}.indelrealigned.bam"
@@ -81,9 +82,12 @@ annovar_table_output="variants/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg
 include: "../rules/annotation/annovar_table.smk"
 
 multiqc_input =  ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + ".fq1_fastqc.zip" for unit in units.itertuples()] + \
-                 ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + ".fq2_fastqc.zip" for unit in units.itertuples()]#  + \
-                 #["qc/samtool/stats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.txt" for unit in units.itertuples()] + \
-                 #["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000.bam.flagstats" for unit in units.itertuples()] + \
+                 ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + ".fq2_fastqc.zip" for unit in units.itertuples()] + \
+                 ["qc/samtool/stats/" + str(sample.Index) + ".0000.primerclip.rg.indelrealigned.bsqr.bam.stats.txt" for sample in samples.itertuples()] + \
+                 ["qc/samtool/stats/" + str(sample.Index) + ".0000-consensus3.primerclip.rg.indelrealigned.bsqr.bam.stats.txt" for sample in samples.itertuples()] + \
+                 ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000.primerclip.rg.indelrealigned.bsqr.bam.flagstats" for unit in units.itertuples()] + \
+                 ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.indelrealigned.bsqr.bam.flagstats" for unit in units.itertuples()] + \
+                 ["alignment/" + str(unit.Index[0]) + ".0000.histo.tsv" for unit in units.itertuples()]
                  #["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.flagstats" for unit in units.itertuples()]
                  #["qc/samtool/stats/" + str(unit.Index[0]) + ".0000.bam.txt" for unit in units.itertuples()] + \
                  #["logs/umis/" + str(unit.Index[0]) + ".fgbioAnnoBam.txt" for unit in units.itertuples()] + \

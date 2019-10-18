@@ -12,7 +12,7 @@ try:
 except:
     pass
 
-_samtool_stats_output = "qc/samtool/stats/{sample}.{part}.bam.txt"
+_samtool_stats_output = "qc/samtool/stats/{sample}.{part}.bam.stats.txt"
 try:
     _samtool_stats_output = samtool_stats_output
 except:

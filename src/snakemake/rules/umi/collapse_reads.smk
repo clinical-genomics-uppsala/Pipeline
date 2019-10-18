@@ -104,14 +104,14 @@ rule pre_collapse_prep_groupreads_by_umi:
     input:
         "alignment/.{sample}.{part}.fgbio.merged.setmateinfo.qsorted.sanitised.bam"
     output:
-        bam=temp("alignment/.{sample}.{part,\d{4}}.merged.sanitised.setmateinfo.groupreads.bam"),
+        bam=temp("alignment/.{sample}.{part}.merged.sanitised.setmateinfo.groupreads.bam"),
         hist="alignment/{sample}.{part}.histo.tsv"
     log:
         "logs/umis_collapse/{sample}.{part}.merged.fgbioGroup.txt"
     params:
         extra="-s adjacency --edits 1 -Xms500m -Xmx64g"
     wrapper:
-        "fgbio-groupreads-hist-output/bio/fgbio/groupreadsbyumi"
+        "master/bio/fgbio/groupreadsbyumi"
 
 rule collapse_reads_create_consensus_reads:
     input:

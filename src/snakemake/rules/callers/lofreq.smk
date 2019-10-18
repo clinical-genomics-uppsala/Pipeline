@@ -44,7 +44,7 @@ rule merge_lofreq_indels:
      log:
          "logs/lofreq/{sample}.{part}.merge.log"
      wrapper:
-         "master/bio/lofreq/tools/lofreq2indelovlp"
+         "lofreq2indelovlp/bio/lofreq/tools/lofreq2indelovlp"
 
 rule lofreq_add_contigs_to_header:
      input:
