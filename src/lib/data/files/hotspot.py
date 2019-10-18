@@ -46,7 +46,6 @@ class Reader(object):
         line = line.lstrip("#")
         self.header = OrderedDict([(name.upper(),index) for index, name in enumerate(line.split("\t"))])
 
-
     def __iter__(self):
         return self
 
@@ -70,6 +69,10 @@ class Reader(object):
         exon = row[self.header['EXON']]
         accession_numbber = row[self.header['ACCESSION_NUMBER']]
         print_all = False
-        if report == ReportClass.region or report == ReportClass.region_all:
+        if report == ReportClass.region_all:
             print_all = True
-        return Hotspot(chrom, start, stop, gene, cds, aa, report, comment, exon, accession_numbber, print_all)
+        always_print = False
+        if report == ReportClass.hotspot or report == ReportClass.region_all:
+            always_print = True
+
+        return Hotspot(chrom, start, stop, gene, cds, aa, report, comment, exon, accession_numbber, always_print, print_all)

@@ -42,7 +42,7 @@ try:
 except:
     pass
 
-_headcrop_read_output = temp("fastq/{sample}.{part,[A-Za-z0-9]+-\d{4}}.{read}.headcrop{num_bases,\d+}.fastq.gz")
+_headcrop_read_output = temp("fastq/{sample}.{part,[A-Za-z0-9]+-\d{4}}.{read}.headcrop.fastq.gz")
 try:
     _headcrop_read_output = headcrop_read_output
 except:
@@ -54,9 +54,9 @@ rule headcrop_read:
    output:
         _headcrop_read_output
    log:
-      "logs/trimming/{sample}.{part}.{read}.headcro{num_bases}.trimmomatic.txt"
+      "logs/trimming/{sample}.{part}.{read}.headcrop.trimmomatic.txt"
    params:
-      trimmer= lambda wildcards: ["HEADCROP:%s" %  config.get('fastq_headcrop_n',wildcards.num_bases)],
+      trimmer= lambda wildcards: ["HEADCROP:%s" %  config.get('fastq_headcrop_n',8)],
       extra=""
    threads: 8
    wrapper:

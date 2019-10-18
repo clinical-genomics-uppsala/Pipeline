@@ -39,7 +39,7 @@ def get_now():
     from datetime import datetime
     return datetime.now().strftime('%Y%m%d')
 
-_add_replace_read_group_input = "alignment/{sample}.{part}.rg.bam"
+_add_replace_read_group_input = "alignment/{sample}.{part}.bam"
 try:
     _add_replace_read_group_input = add_replace_read_group_input
 except:

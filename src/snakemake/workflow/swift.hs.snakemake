@@ -7,10 +7,11 @@ wildcard_constraints:
     unit="[A-Za-z0-9]+",
     sample="[A-Za-z0-9-]+",
     read="[fq12]+",
-    part="\d{4}|\d{4}-consensus\d+|\d{4}-consensus\d+\.primerclip\.rg", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
+    #part="\d{4}-consensus\d+\.primerclip\.rg\.indelrealigned\.lofreq\.vcf|\d{4}\.primerclip\.rg\.indelrealigned\.lofreq\.vcf",
+    #part="\d{4}.primerclip|\d{4}-consensus\d+|\d{4}-consensus\d+\.primerclip\.rg", #part="|[A-Za-z0-9]{4}|\d{4}-consensus\d+"
     consensus="\d{4}-consensus\d+"
 
-singularity: "/projects/wp1/nobackup/ngs/utveckling/software/Pipeline/singularity/swift.simg" #"/projects/wp1/nobackup/ngs/utveckling/workspace/swift/caps.simg"
+singularity: config.get("singularity_image","")
 
 def _get_split_and_unit_part_files(wildcards, units, config):
     num_splits = config.get("num_fastq_split", 1)
@@ -31,10 +32,10 @@ include: "../rules/umi/extract_umis_read_head.smk"
 
 include: "../rules/fastq/fastqc.smk"
 
-bwa_mem_input = ["fastq/{sample}.{part}.fq1.fastq.gz", "fastq/{sample}.{part}.fq2.headcrop10.fastq.gz"]
+bwa_mem_input = ["fastq/{sample}.{part}.fq1.fastq.gz", "fastq/{sample}.{part}.fq2.headcrop.fastq.gz"]
 include: "../rules/alignment/bwa_mem.smk"
 
-annotate_bam_with_umi_input_umi = "umis/{sample}.{part,[A-Za-z0-9]+-\d{4}}.fq2.UMIs10.fastq"
+annotate_bam_with_umi_input_umi = "umis/{sample}.{part,[A-Za-z0-9]+-\d{4}}.fq2.UMIs.fastq"
 include: "../rules/umi/annotate_bam_with_umi.smk"
 
 merge_bam_input = lambda wildcards: ["alignment/{}.{}.umiAnnoBam.bam".format(wildcards.sample,unit_part) for unit_part in _get_split_and_unit_part_files(wildcards,units,config)]
@@ -42,45 +43,55 @@ merge_bam_output = "alignment/{sample}.0000.bam"
 include: "../rules/alignment/merge_bam.smk"
 
 collapse_reads_input="alignment/{sample}.{part}.bam"
-collapse_reads_output="alignment/{sample}.{part,\d{4}}-consensus{num_support}.primerclip_input.bam"
+collapse_reads_output="alignment/{sample}.{part,\d{4}}-consensus{num_support}.bam"
 include: "../rules/umi/collapse_reads.smk"
 
-primerclip_input="alignment/{sample}.{part}.primerclip_input.bam"
-primerclip_output="alignment/{sample}.{part}.primerclip_output.bam"
+#primerclip_input="alignment/{sample}.{part}.primerclip_input.bam"
+primerclip_output="alignment/{sample}.{part,\d{4}-consensus\d+|\d{4}}.primerclip.bam"
 include: "../rules/trimming/primerclip.smk"
 
-add_replace_read_group_input = "alignment/{sample}.{part}.primerclip_output.bam"
-add_replace_read_group_output = "alignment/{sample}.{part}.primerclip.rg.bam"
+#add_replace_read_group_input = "alignment/{sample}.{part}.bam"
+add_replace_read_group_output = "alignment/{sample}.{part,\d{4}-consensus\d+\.primerclip|\d{4}\.primerclip}.rg.bam"
 include: "../rules/alignment/add_replace_read_group.smk"
 
 include: "../rules/alignment/samtool_stats.smk"
 include: "../rules/alignment/samtool_flagstats.smk"
+include: "../rules/alignment/index_bam.smk"
+include: "../rules/alignment/coveragebed.smk"
 
-gatk3_indelrealignment_input=add_replace_read_group_output
-gatk3_indelrealignment_output="alignment/{sample}.{part}.indelrealigned.bam"
+#gatk3_indelrealignment_input=add_replace_read_group_output
+gatk3_indelrealignment_output="alignment/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg|\d{4}\.primerclip\.rg}.indelrealigned.bam"
 include: "../rules/alignment/gatk3_indelrealignment.smk"
 
-mpileup_input=gatk3_indelrealignment_output
+#mpileup_input=gatk3_indelrealignment_output
+mpileup_input="alignment/{sample}.{part}.bam"
+mpileup_output="pileup/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg\.indelrealigned\.bsqr|\d{4}\.primerclip\.rg\.indelrealigned\.bsqr}.mpileup.gz"
 include: "../rules/alignment/mpileup.smk"
 
-gatk3_baserecalibrator_input=add_replace_read_group_output
-gatk3_baserecalibrator_input_realigned=gatk3_indelrealignment_output
-gatk3_baserecalibrator_output="alignment/{sample}.{part}.bsqr.bam"
-#include: "../rules/alignment/gatk_baserecalibrator.smk"
+#gatk3_baserecalibrator_input=add_replace_read_group_output
+#gatk3_baserecalibrator_input_realigned=gatk3_indelrealignment_output
+gatk3_baserecalibrator_output="alignment/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg\.indelrealigned|\d{4}\.primerclip\.rg\.indelrealigned}.bsqr.bam"
 include: "../rules/alignment/gatk3_baserecalibrator.smk"
 
-lofreq_input=gatk3_baserecalibrator_output
+#lofreq_input=gatk3_baserecalibrator_output
+lofreq_output="variants/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg\.indelrealigned\.bsqr|\d{4}\.primerclip\.rg\.indelrealigned\.bsqr}.lofreq.vcf"
 include: "../rules/callers/lofreq.smk"
 
-annovar_table_output="variants/{sample}.{part}.lofreq.annovar.vcf"
-annovar_table_input=_lofreq_output
+annovar_table_output="variants/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg\.indelrealigned\.bsqr\.lofreq}.annovar.vcf"
+#annovar_table_input=_lofreq_output
 include: "../rules/annotation/annovar_table.smk"
 
-multiqc_input =  ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + "_fastqc.zip" for unit in units.itertuples()]  + \
-                 ["qc/samtool/stats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.txt" for unit in units.itertuples()] + \
-                 ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000.bam.flagstats" for unit in units.itertuples()] + \
-                 ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.flagstats" for unit in units.itertuples()]
+multiqc_input =  ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + ".fq1_fastqc.zip" for unit in units.itertuples()] + \
+                 ["qc/fastqc/" + str(unit.Index[0]) + "." + str(unit.Index[1]) + ".fq2_fastqc.zip" for unit in units.itertuples()] + \
+                 ["qc/samtool/stats/" + str(sample.Index) + ".0000.primerclip.rg.indelrealigned.bsqr.bam.stats.txt" for sample in samples.itertuples()] + \
+                 ["qc/samtool/stats/" + str(sample.Index) + ".0000-consensus3.primerclip.rg.indelrealigned.bsqr.bam.stats.txt" for sample in samples.itertuples()] + \
+                 ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000.primerclip.rg.indelrealigned.bsqr.bam.flagstats" for unit in units.itertuples()] + \
+                 ["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.indelrealigned.bsqr.bam.flagstats" for unit in units.itertuples()] + \
+                 ["alignment/" + str(unit.Index[0]) + ".0000.histo.tsv" for unit in units.itertuples()]
+                 #["qc/samtool/flagstats/" + str(unit.Index[0]) + ".0000-consensus3.primerclip.rg.bam.flagstats" for unit in units.itertuples()]
                  #["qc/samtool/stats/" + str(unit.Index[0]) + ".0000.bam.txt" for unit in units.itertuples()] + \
                  #["logs/umis/" + str(unit.Index[0]) + ".fgbioAnnoBam.txt" for unit in units.itertuples()] + \
 include: "../rules/reports/multiqc.smk"
+
+generate_filtered_mutations_wp1_output="reports/{sample}.{part,\d{4}-consensus\d+\.primerclip\.rg\.indelrealigned\.bsqr}.{caller,[A-Za-z]+}.filteredMutation.tsv"
 include: "../rules/reports/filter_mutations.smk"
