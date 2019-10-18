@@ -42,7 +42,7 @@ rule gatk3_realignertargetcreator:
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
     threads: 8
     wrapper:
-        "gatk-tools/bio/gatk3/realignertargetcreator"
+        "master/bio/gatk3/realignertargetcreator"
 
 rule gatk3_indelrealigner:
     input:
@@ -60,4 +60,4 @@ rule gatk3_indelrealigner:
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
     threads: 8
     wrapper:
-        "gatk-tools/bio/gatk3/indelrealigner"
+        "master/bio/gatk3/indelrealigner"

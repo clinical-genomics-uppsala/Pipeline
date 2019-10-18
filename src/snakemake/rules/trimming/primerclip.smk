@@ -73,7 +73,7 @@ rule primerclip:
     log:
         "logs/primerclip/{sample}.{part}.log"
     wrapper:
-        "master/bio/primerclip"
+        "primerclip/bio/primerclip"
 
 rule primerclip_bam_generation:
     input:

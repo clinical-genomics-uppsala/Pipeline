@@ -34,4 +34,4 @@ rule fastqc:
     log:
         "logs/fastqc/{sample}.{unit}.{read}.log"
     wrapper:
-        "fastq-multi-read-input/bio/fastqc"
+        "master/bio/fastqc"

@@ -32,7 +32,7 @@ rule gatk3_bqsr_table:
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample],
     threads: 8
     wrapper:
-        "gatk-tools/bio/gatk3/baserecalibrator"
+        "master/bio/gatk3/baserecalibrator"
 
 rule gatk3_bqsr_printreads:
     input:
@@ -50,4 +50,4 @@ rule gatk3_bqsr_printreads:
         bed=lambda wildcards: samples['analyzable_region'][wildcards.sample]
     threads: 8
     wrapper:
-        "gatk-tools/bio/gatk3/printreads"
+        "master/bio/gatk3/printreads"
